@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite App</title>
+    <!-- <link href="tailwind.css" rel="stylesheet" /> -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@1,600&family=Lato&display=swap" rel="stylesheet">
+    <style>
+      body {
+        margin: 0;
+      }
+
+      .font-exo {
+        font-family: 'Exo 2', sans-serif;
+      }
+      .font-exo {
+        font-family: 'Lato', sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="popUpEl" class="bg-black bg-opacity-75 fixed px-3 py-2 rounded-lg">
+      <h2 class = "text-white text-xs">
+        <span id = "populationEl"></span>
+        <span>Population</span>
+      </h2>
+      <p id = "populationValueEl" class = "text-white font-bold text-lg">300mil</p>
+    </div>
+    <div class="xl:flex-col h-screen">
+
+      <div class = "h-4/5 w-screen flex-col" id = "globeContainer">
+        <canvas id = "globeCanvas"></canvas>
+      </div>
+
+      <div class =" h-0 w-screen" id = "timelineContainer">
+        <canvas id = "timelineCanvas"></canvas>
+      </div>
+    
+    </div>
+    <script type="module" src="/globe.js"></script>
+    <script type="module" src="/timeline.js"></script>
+    
+  </body>
+</html>
