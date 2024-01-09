@@ -8,12 +8,9 @@ timelineContainer.onwheel = zoom
 let width = timelineContainer.offsetWidth
 let height = window.innerHeight/5 // Hardcoded, change based on index.html
 
-let tickSize = 10
-let tickWidth = 2
-let minSpcBtwn = 30
-let maxSpcBtwn = width
-let spcBtwn = 50
-let numTick = width/spcBtwn
+let tickSize = 10, tickWidth = 2
+let minSpcBtwn = 30, maxSpcBtwn = width
+let spcBtwn = 50, numTick = width/spcBtwn
 
 let prevX = 0
 
