@@ -19,5 +19,13 @@
   "main": "counter.js",
   "author": "",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Takyumi/Splash.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Takyumi/Splash/issues"
+  },
+  "homepage": "https://github.com/Takyumi/Splash#readme",
   "description": ""
 }

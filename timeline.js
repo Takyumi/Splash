@@ -9,25 +9,22 @@ let width = timelineContainer.offsetWidth
 let height = window.innerHeight/5 // Hardcoded, change based on index.html
 
 let tickSize = 10
+let tickWidth = 2
 let minSpcBtwn = 30
 let maxSpcBtwn = width
 let spcBtwn = 50
 let numTick = width/spcBtwn
 
-let xPrev = 0, yPrev = 0
-let delta = 0
-let leftTick = 0, rightTick = leftTick + spcBtwn * (numTick - 1)
-let dright = 0
+let prevX = 0
 
 let mouseDrag = false
 let zoomRatio = -0.01
 
-let tickIncr = 1;
-let leftYear = 1950;
+let tickIncr = 1
 
 let two
 
-let yearPlus = 0.0;
+let leftX = 0, leftYear = 1950
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -47,7 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('mousedown', mousePressed)
   document.addEventListener('mouseup', mouseReleased)
   document.addEventListener('mousemove', mouseMoved)
-  // document.addEventListener('wheel', zoom)
 
 })
 
@@ -69,84 +65,48 @@ function draw() {
   mainLine.stroke = 'black'
   mainLine.linewidth = 2
 
-  while (dright < 0) {
-    dright += spcBtwn // visible not negative
+  while (leftX < 0) {
+    leftX += spcBtwn
+    leftYear += tickIncr
   }
-  
-  let ticksDrawn = 0
+  while (leftX >= spcBtwn) {
+    leftX -= spcBtwn
+    leftYear -= tickIncr
+  }
 
-  while (dright >= spcBtwn) {
-    dright -= spcBtwn
-    drawTick(width - dright, ticksDrawn)
-    ticksDrawn += 1
+  for (let i = 0; i <= numTick; i++) {
+    drawTick(leftX + (i * spcBtwn), i);
   }
 
   // add circles for debugging if needed
-  let rcircle = two.makeCircle(width - dright, height / 2, 5)
+  let rcircle = two.makeCircle(leftX, height / 2, 5)
   rcircle.stroke = 'blue'
-
-  while (ticksDrawn < numTick) {
-    yearPlus = Math.floor((leftTick + delta)/spcBtwn)
-    drawTick(width - dright - (ticksDrawn * spcBtwn), ticksDrawn)
-    ticksDrawn += 1
-  }
-
 }
 
 function drawTick(x, ticksDrawn) {
   let tick = two.makeLine(x, height/2 + tickSize, x, height/2 - tickSize)
   tick.stroke = 'black'
-  tick.linewidth = 2
+  tick.linewidth = tickWidth
 
-  let label = two.makeText(leftYear - ticksDrawn, x, height/2 + 20)
+  two.makeText(leftYear + ticksDrawn, x, height/2 + 20)
 }
 
 function mousePressed(event) {
   if (event.clientY > window.innerHeight - height) {
-    xPrev = event.clientX
-    yPrev = event.clientY
-
-    delta = 0
-    diff = dright
+    prevX = event.clientX
     mouseDrag = true
   }
 }
 
 function mouseReleased(event) {
-  if (mouseDrag) {
-    leftTick = (delta + leftTick) % spcBtwn
-    while (leftTick < 0) {
-      leftTick += spcBtwn
-    }
-    
-    rightTick = leftTick + spcBtwn * (numTick - 1)
-
-    dright = width - rightTick
-    curr = dright
-  }
   mouseDrag = false
 }
-let curr = dright
-let diff = dright
 
 function mouseMoved(event) {
   if (mouseDrag) {
-    delta = event.clientX - xPrev
-    dright = width - (rightTick + delta) // while mousePressed it is still the rightClick from before
-    let prev = curr
-    curr = dright
-    diff += curr - prev
-    while (diff < 0) {
-      console.log('minus')
-      diff += spcBtwn // visible not negative
-      leftYear -= tickIncr
-    }
-    while (diff >= spcBtwn) {
-      console.log('plus')
-      diff -= spcBtwn
-      leftYear += tickIncr
-    }
-    console.log(leftYear)
+    leftX += event.clientX - prevX
+    prevX = event.clientX
+    console.log(leftX)
   }
 }
 
@@ -169,6 +129,6 @@ function zoom(event) {
     change = 0
   }
 
-  let dshift = change * (width - dright - event.clientX) / spcBtwn
-  dright -= dshift
+  let dshift = change * (event.clientX - leftX) / spcBtwn
+  leftX -= dshift
 }
