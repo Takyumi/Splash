@@ -1,6 +1,6 @@
 import './tailwind.css'
 import gsap from 'gsap'
-import * as THREE from "https://unpkg.com/three@0.158.0/build/three.module.js";
+import * as THREE from "https://unpkg.com/three@0.158.0/build/three.module.js"
 import countries from './countries.json'
 import vertexShader from "./shaders/vertex.glsl"
 import fragmentShader from "./shaders/fragment.glsl"
@@ -9,11 +9,21 @@ import atmosphereFragmentShader from "./shaders/atmosphereFragment.glsl"
 
 //console.log(countries)
 
-const globeContainer = document. 
-  querySelector('#globeContainer')
+const globeContainer = document.querySelector('#globeContainer')
+globeContainer.onwheel = zoom
 
-const scene = new THREE.Scene();
-scene.background = new THREE.Color( 0xeeeee4 );
+function zoom(event) {
+  event.preventDefault()
+  camera.position.z += event.deltaY * -0.005
+  if (camera.position.z < 5.6) {
+    camera.position.z = 5.6
+  } else if (camera.position.z > 20) {
+    camera.position.z = 20
+  }
+}
+
+const scene = new THREE.Scene()
+scene.background = new THREE.Color( 0xeeeee4 )
 let camera = new THREE.PerspectiveCamera(75,globeContainer.offsetWidth / globeContainer.offsetHeight, 0.1, 1000)
 const renderer = new THREE.WebGLRenderer(
   {
