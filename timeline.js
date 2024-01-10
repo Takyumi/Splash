@@ -103,19 +103,18 @@ function mouseMoved(event) {
   if (mouseDrag) {
     leftX += event.clientX - prevX
     prevX = event.clientX
-    console.log(leftX)
   }
 }
 
 function zoom(event) {
   event.preventDefault()
   
-  let change = event.deltaY * zoomRatio
   if (spcBtwn > 100 && spcBtwn < 200) {
-    zoomRatio -= change*0.001
+    zoomRatio = spcBtwn * -0.0002 + 0.01
   }
   // console.log(zoomRatio)
-  
+
+  let change = event.deltaY * zoomRatio
   spcBtwn += change
   while (spcBtwn < minSpcBtwn) {
     spcBtwn = minSpcBtwn
