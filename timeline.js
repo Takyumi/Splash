@@ -8,13 +8,9 @@ timelineContainer.onwheel = zoom
 let width = timelineContainer.offsetWidth
 let height = window.innerHeight/5 // Hardcoded, change based on index.html
 
-let tickSize = 10
-let tickWidth = 2
-
-let minSpcBtwn = 30
-let maxSpcBtwn = width //up to change in the future 
-let spcBtwn = 50
-let numTick = width/spcBtwn
+let tickSize = 10, tickWidth = 2
+let minSpcBtwn = 30, maxSpcBtwn = width
+let spcBtwn = 50, numTick = width/spcBtwn
 
 let prevX = 0
 
@@ -118,7 +114,6 @@ function mouseMoved(event) {
   if (mouseDrag) {
     leftX += event.clientX - prevX
     prevX = event.clientX
-    //console.log(leftX)
   }
   
   mouseX = event.clientX
@@ -128,13 +123,12 @@ function mouseMoved(event) {
 function zoom(event) {
   event.preventDefault()
   
-  let change = event.deltaY * zoomRatio
-
   if (spcBtwn > 100 && spcBtwn < 200) {
-    zoomRatio -= change*0.001
+    zoomRatio = spcBtwn * -0.0002 + 0.01
   }
   // console.log(zoomRatio)
-  
+
+  let change = event.deltaY * zoomRatio
   spcBtwn += change
   while (spcBtwn < minSpcBtwn) {
     spcBtwn = minSpcBtwn
