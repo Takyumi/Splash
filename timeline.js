@@ -10,8 +10,9 @@ let height = window.innerHeight/5 // Hardcoded, change based on index.html
 
 let tickSize = 10
 let tickWidth = 2
+
 let minSpcBtwn = 30
-let maxSpcBtwn = width
+let maxSpcBtwn = width //up to change in the future 
 let spcBtwn = 50
 let numTick = width/spcBtwn
 
@@ -25,6 +26,13 @@ let tickIncr = 1
 let two
 
 let leftX = 0, leftYear = 1950
+
+let targetPosition = 100;
+
+let frameY = window.innerHeight - height
+let mouseX = 0;
+let mouseY = 0;
+
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -81,6 +89,8 @@ function draw() {
   // add circles for debugging if needed
   let rcircle = two.makeCircle(leftX, height / 2, 5)
   rcircle.stroke = 'blue'
+
+  target()
 }
 
 function drawTick(x, ticksDrawn) {
@@ -96,6 +106,8 @@ function mousePressed(event) {
     prevX = event.clientX
     mouseDrag = true
   }
+
+  //if (mouseX )
 }
 
 function mouseReleased(event) {
@@ -106,14 +118,18 @@ function mouseMoved(event) {
   if (mouseDrag) {
     leftX += event.clientX - prevX
     prevX = event.clientX
-    console.log(leftX)
+    //console.log(leftX)
   }
+  
+  mouseX = event.clientX
+  mouseY = event.clientY - frameY
 }
 
 function zoom(event) {
   event.preventDefault()
   
   let change = event.deltaY * zoomRatio
+
   if (spcBtwn > 100 && spcBtwn < 200) {
     zoomRatio -= change*0.001
   }
@@ -131,4 +147,17 @@ function zoom(event) {
 
   let dshift = change * (event.clientX - leftX) / spcBtwn
   leftX -= dshift
+}
+
+function target() {
+  let target = two.makeCircle(targetPosition, height/2, 5)
+  target.stroke = 'red'
+
+  if (mouseX > targetPosition - 5 &&
+    mouseX < targetPosition + 5 &&
+    mouseY > (height/2) - 5 &&
+    mouseY < height/2 + 5)
+   {
+    console.log('mouse is on!')
+  }
 }
