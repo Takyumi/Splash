@@ -9,7 +9,7 @@ let width = timelineContainer.offsetWidth
 let height = window.innerHeight/5 // Hardcoded, change based on index.html
 
 let tickSize = 10, tickWidth = 2
-let minSpcBtwn = 30, maxSpcBtwn = width
+let minSpcBtwn = 30, maxSpcBtwn = 400
 let spcBtwn = 50, numTick = width/spcBtwn
 
 let prevX = 0
@@ -112,19 +112,22 @@ function zoom(event) {
   if (spcBtwn > 100 && spcBtwn < 200) {
     zoomRatio = spcBtwn * -0.0002 + 0.01
   }
-  // console.log(zoomRatio)
 
+  let prevSpcBtwn = spcBtwn
   let change = event.deltaY * zoomRatio
-  spcBtwn += change
-  while (spcBtwn < minSpcBtwn) {
+  if (spcBtwn + change < minSpcBtwn) {
+    change = minSpcBtwn - spcBtwn
     spcBtwn = minSpcBtwn
-    change = 0
-  }
-  while (spcBtwn > maxSpcBtwn) {
+  } else if (spcBtwn + change > maxSpcBtwn) {
+    change = maxSpcBtwn - spcBtwn
     spcBtwn = maxSpcBtwn
-    change = 0
+  } else {
+    spcBtwn += change
   }
 
-  let dshift = change * (event.clientX - leftX) / spcBtwn
+  let dshift = change * (event.clientX - leftX) / prevSpcBtwn
   leftX -= dshift
+  if (change <= 0) {
+    console.log(dshift, spcBtwn, leftX)
+  }
 }
