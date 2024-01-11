@@ -103,7 +103,6 @@ function mousePressed(event) {
     mouseDrag = true
   }
 
-  //if (mouseX )
 }
 
 function mouseReleased(event) {
@@ -122,17 +121,19 @@ function mouseMoved(event) {
 
 function zoom(event) {
   event.preventDefault()
-  
+
+  let change = event.deltaY * zoomRatio
+
   if (spcBtwn > 100 && spcBtwn < 200) {
     zoomRatio = spcBtwn * -0.0002 + 0.01
   }
-  // console.log(zoomRatio)
-
-  let change = event.deltaY * zoomRatio
-  spcBtwn += change
-  while (spcBtwn < minSpcBtwn) {
+  
+  while (spcBtwn < minSpcBtwn && event.deltaY > 0) {
     spcBtwn = minSpcBtwn
     change = 0
+    leftX = 0
+    // event.deltaY = 0
+    // event.preventDefault();
   }
   while (spcBtwn > maxSpcBtwn) {
     spcBtwn = maxSpcBtwn
@@ -140,7 +141,9 @@ function zoom(event) {
   }
 
   let dshift = change * (event.clientX - leftX) / spcBtwn
+  spcBtwn += change
   leftX -= dshift
+  console.log(spcBtwn)
 }
 
 function target() {
