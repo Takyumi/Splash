@@ -14,23 +14,23 @@ let spcBtwn = 50, numTick = width/spcBtwn
 
 let prevX = 0
 
-let mouseDrag = false
+let timelineDrag = false, targetDrag = false
+let targetSize = 5
+
 let zoomRatio = -0.01
 
 let tickIncr = 1
 
 let two
 
-let leftX = 0, leftYear = 1950
+let leftX = 0, leftYear = 1
+let bce = false, tickBCE = false
 
 let targetPosition = 100;
 
 let frameY = window.innerHeight - height
 let mouseX = 0;
 let mouseY = 0;
-
-let allowNormalMouseFunction = true
-
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -73,13 +73,19 @@ function draw() {
 
   while (leftX < 0) {
     leftX += spcBtwn
-    leftYear += tickIncr
+
+    leftYear += bce ? -tickIncr : tickIncr
   }
   while (leftX >= spcBtwn) {
     leftX -= spcBtwn
-    leftYear -= tickIncr
+    leftYear -= bce ? -tickIncr : tickIncr
+  }
+  if (leftYear == 0) {
+    bce = !bce
+    leftYear = 1
   }
 
+  tickBuffer = 0
   for (let i = 0; i <= numTick; i++) {
     drawTick(leftX + (i * spcBtwn), i);
   }
@@ -91,28 +97,44 @@ function draw() {
   target()
 }
 
+let tickBuffer = 0
+
 function drawTick(x, ticksDrawn) {
   let tick = two.makeLine(x, height/2 + tickSize, x, height/2 - tickSize)
   tick.stroke = 'black'
   tick.linewidth = tickWidth
 
-  two.makeText(leftYear + ticksDrawn, x, height/2 + 20)
+  let tickYear = Math.abs(leftYear + (bce ? -ticksDrawn : ticksDrawn) - tickBuffer)
+  if (tickYear == 0) {
+    tickBuffer = 1
+    tickYear = 1
+  }
+
+  two.makeText(tickYear, x, height/2 + 20)
 }
 
 function mousePressed(event) {
   if (event.clientY > window.innerHeight - height) {
     prevX = event.clientX
-    mouseDrag = true
+    if (mouseX > targetPosition - targetSize &&
+      mouseX < targetPosition + targetSize &&
+      mouseY > (height/2) - targetSize &&
+      mouseY < height/2 + targetSize) {
+      targetDrag = true
+    } else {
+      timelineDrag = true
+    }
   }
 
 }
 
 function mouseReleased(event) {
-  mouseDrag = false
+  timelineDrag = false
+  targetDrag = false
 }
 
 function mouseMoved(event) {
-  if (mouseDrag) {
+  if (timelineDrag) {
     leftX += event.clientX - prevX
     prevX = event.clientX
   }
@@ -174,20 +196,19 @@ function target() {
   targetTop.fill = 'red'
   targetTop.linewidth = 0
 
-  let buttonSize = 5
+  if (targetDrag) {  
+    targetPosition = mouseX
+    target.fill = 'red'
+  }
+  
+  let yearDiff = Math.floor((targetPosition - leftX) / spcBtwn)
+  let targetYear = leftYear + (bce ? -yearDiff : yearDiff)
+  let targetBCE = bce
+  if (targetYear <= 0) {
+    targetYear -= 1
+    targetBCE = !targetBCE
+  }
+  two.makeText(Math.abs(targetYear) + (targetBCE ? " BCE" : " CE"), targetPosition, height/2 + 50)
 
-  if (mouseX > targetPosition - buttonSize &&
-    mouseX < targetPosition + buttonSize &&
-    mouseY > (height/2) - buttonSize &&
-    mouseY < height/2 + buttonSize &&
-    mouseDrag && allowNormalMouseFunction)
-   {  
-      buttonSize = 200
-      targetPosition = mouseX
-      target.fill = 'red'
-      
-   } else {
-      
-   }
 }
 
