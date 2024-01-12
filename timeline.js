@@ -9,7 +9,7 @@ let width = timelineContainer.offsetWidth
 let height = window.innerHeight/5 // Hardcoded, change based on index.html
 
 let tickSize = 10, tickWidth = 2
-let minSpcBtwn = 30, maxSpcBtwn = width
+let minSpcBtwn = 30, maxSpcBtwn = 400
 let spcBtwn = 50, numTick = width/spcBtwn
 
 let prevX = 0
@@ -28,6 +28,8 @@ let targetPosition = 100;
 let frameY = window.innerHeight - height
 let mouseX = 0;
 let mouseY = 0;
+
+let allowNormalMouseFunction = true
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -122,39 +124,70 @@ function mouseMoved(event) {
 function zoom(event) {
   event.preventDefault()
 
-  let change = event.deltaY * zoomRatio
-
   if (spcBtwn > 100 && spcBtwn < 200) {
     zoomRatio = spcBtwn * -0.0002 + 0.01
   }
-  
-  while (spcBtwn < minSpcBtwn && event.deltaY > 0) {
+
+  let prevSpcBtwn = spcBtwn
+  let change = event.deltaY * zoomRatio
+  if (spcBtwn + change < minSpcBtwn) {
+    change = minSpcBtwn - spcBtwn
     spcBtwn = minSpcBtwn
-    change = 0
-    leftX = 0
-    // event.deltaY = 0
-    // event.preventDefault();
-  }
-  while (spcBtwn > maxSpcBtwn) {
+  } else if (spcBtwn + change > maxSpcBtwn) {
+    change = maxSpcBtwn - spcBtwn
     spcBtwn = maxSpcBtwn
-    change = 0
+  } else {
+    spcBtwn += change
   }
 
-  let dshift = change * (event.clientX - leftX) / spcBtwn
-  spcBtwn += change
+  let dshift = change * (event.clientX - leftX) / prevSpcBtwn
   leftX -= dshift
-  console.log(spcBtwn)
+  if (change <= 0) {
+    console.log(dshift, spcBtwn, leftX)
+  }
 }
 
 function target() {
   let target = two.makeCircle(targetPosition, height/2, 5)
   target.stroke = 'red'
+  // let targetLine = two.makeLine(targetPosition, height/2 + 30, targetPosition, height/2 - 30)
+  // targetLine.stroke = 'red'
+  // targetLine.linewidth = 1.5
 
-  if (mouseX > targetPosition - 5 &&
-    mouseX < targetPosition + 5 &&
-    mouseY > (height/2) - 5 &&
-    mouseY < height/2 + 5)
-   {
-    console.log('mouse is on!')
-  }
+  const bottomVertices = [
+    new Two.Vector(targetPosition, height / 2 + 25),
+    new Two.Vector(targetPosition - 5, height/2 + 35),
+    new Two.Vector(targetPosition + 5, height/2 + 35)
+  ]
+
+  const topVertices = [
+    new Two.Vector(targetPosition, height / 2 - 25),
+    new Two.Vector(targetPosition - 5, height/2 - 35),
+    new Two.Vector(targetPosition + 5, height/2 - 35)
+  ]
+
+  let targetBottom = two.makePath(bottomVertices, true)
+  targetBottom.fill = 'red'
+  targetBottom.linewidth = 0
+
+  let targetTop = two.makePath(topVertices, true)
+  targetTop.fill = 'red'
+  targetTop.linewidth = 0
+
+  let buttonSize = 5
+
+  if (mouseX > targetPosition - buttonSize &&
+    mouseX < targetPosition + buttonSize &&
+    mouseY > (height/2) - buttonSize &&
+    mouseY < height/2 + buttonSize &&
+    mouseDrag && allowNormalMouseFunction)
+   {  
+      buttonSize = 200
+      targetPosition = mouseX
+      target.fill = 'red'
+      
+   } else {
+      
+   }
 }
+
