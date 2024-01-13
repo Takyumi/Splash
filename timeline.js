@@ -8,14 +8,17 @@ timelineContainer.onwheel = zoom
 let width = timelineContainer.offsetWidth
 let height = window.innerHeight/5 // Hardcoded, change based on index.html
 
-let tickSize = 10, tickWidth = 2
-let minSpcBtwn = 30, maxSpcBtwn = 400
+const tickSize = 10, tickWidth = 2
+const minSpcBtwn = 30, maxSpcBtwn = 400
+
 let spcBtwn = 50, numTick = width/spcBtwn
+
+let currentDate = new Date(), currentYear = currentDate.getFullYear()
 
 let prevX = 0
 
 let timelineDrag = false, targetDrag = false
-let targetSize = 5
+const targetSize = 5
 
 let zoomRatio = -0.01
 
@@ -23,14 +26,13 @@ let tickIncr = 1
 
 let two
 
-let leftX = 0, leftYear = 1
-let bce = false, tickBCE = false
+let leftX = 0, leftYear = 1975
+let bce = false
 
-let targetPosition = 100;
+let targetPosition = 100
 
 let frameY = window.innerHeight - height
-let mouseX = 0;
-let mouseY = 0;
+let mouseX = 0, mouseY = 0
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -56,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function resize() {
   width = timelineContainer.offsetWidth
   height = window.innerHeight/5 // Hardcoded, change based on index.html
+  frameY = window.innerHeight - height
 
   two.width = width
   two.height = height
@@ -66,6 +69,8 @@ function resize() {
 function draw() {
   two.clear()
   resize()
+  currentDate = new Date()
+  currentYear = currentDate.getFullYear()
 
   let mainLine = two.makeLine(0, height / 2, width, height / 2)
   mainLine.stroke = 'black'
@@ -73,7 +78,6 @@ function draw() {
 
   while (leftX < 0) {
     leftX += spcBtwn
-
     leftYear += bce ? -tickIncr : tickIncr
   }
   while (leftX >= spcBtwn) {
@@ -90,34 +94,45 @@ function draw() {
     drawTick(leftX + (i * spcBtwn), i);
   }
 
-  // add circles for debugging if needed
-  let rcircle = two.makeCircle(leftX, height / 2, 5)
-  rcircle.stroke = 'blue'
+  // let rcircle = two.makeCircle(leftX, height / 2, 5)
+  // rcircle.stroke = 'blue'
 
   target()
+  skip()
 }
 
 let tickBuffer = 0
 
 function drawTick(x, ticksDrawn) {
-  let tick = two.makeLine(x, height/2 + tickSize, x, height/2 - tickSize)
-  tick.stroke = 'black'
-  tick.linewidth = tickWidth
-
   let tickYear = Math.abs(leftYear + (bce ? -ticksDrawn : ticksDrawn) - tickBuffer)
   if (tickYear == 0) {
     tickBuffer = 1
     tickYear = 1
   }
 
-  two.makeText(tickYear, x, height/2 + 20)
+  if (tickYear <= currentYear) {
+    let tick = two.makeLine(x, height/2 + tickSize, x, height/2 - tickSize)
+    tick.stroke = 'black'
+    tick.linewidth = tickWidth
+
+    two.makeText(tickYear, x, height/2 + 20)
+  }
 }
 
+let skipBackCount = 0, skipFrontCount = 0
+let skipBack = false, skipFront = false
+
 function mousePressed(event) {
+  mouseX = event.clientX
+  mouseY = event.clientY - frameY
   if (event.clientY > window.innerHeight - height) {
-    prevX = event.clientX
+    prevX = mouseX
     if (inTarget(mouseX, mouseY)) {
       targetDrag = true
+    } else if (inBackSkip(mouseX, mouseY)) {
+      skipBack = true
+    } else if (inFrontSkip(mouseX, mouseY)) {
+      skipFront = true
     } else {
       timelineDrag = true
     }
@@ -144,27 +159,40 @@ function inTarget(x, y) {
   return inTargetCircle || inTopTriangle || inBottomTriangle
 }
 
-function mouseReleased(_event) {
+function mouseReleased(event) {
+  mouseX = event.clientX
+  mouseY = event.clientY - frameY
+  if (skipBack && inBackSkip(mouseX, mouseY)) {
+    skipBackCount %= 3
+    skipBackCount++
+    leftYear -= skipBackCount * 5
+  } else if (skipFront && inFrontSkip(mouseX, mouseY)) {
+    skipFrontCount %= 3
+    skipFrontCount++
+    leftYear += skipFrontCount * 5
+    if (currentYear < leftYear + numTick) {
+      leftYear = Math.round(currentYear - numTick) + 1
+    }
+  }
   timelineDrag = false
   targetDrag = false
+  skipBack = false
+  skipFront = false
 }
 
 function mouseMoved(event) {
-  if (timelineDrag) {
-    leftX += event.clientX - prevX
-    prevX = event.clientX
-  }
-  
   mouseX = event.clientX
   mouseY = event.clientY - frameY
+  if (timelineDrag) {
+    let tempX = leftX + mouseX - prevX
+    leftX = (tempX < 0 && currentYear < leftYear + numTick) ? 0 : tempX
+    prevX = mouseX
+  }
 }
 
 function zoom(event) {
   event.preventDefault()
-
-  if (spcBtwn > 100 && spcBtwn < 200) {
-    zoomRatio = spcBtwn * -0.0002 + 0.01
-  }
+  zoomRatio = spcBtwn * -0.0002 - 0.01
 
   let prevSpcBtwn = spcBtwn
   let change = event.deltaY * zoomRatio
@@ -180,9 +208,6 @@ function zoom(event) {
 
   let dshift = change * (event.clientX - leftX) / prevSpcBtwn
   leftX -= dshift
-  if (change <= 0) {
-    console.log(dshift, spcBtwn, leftX)
-  }
 }
 
 function target() {
@@ -225,5 +250,38 @@ function target() {
     targetBCE = !targetBCE
   }
   two.makeText(Math.abs(targetYear) + (targetBCE ? " BCE" : " CE"), targetPosition, height/2 + 50)
+}
 
+function skip() {
+  const skipY = 4*height/5
+
+  const backVertices = [
+    new Two.Vector(15, skipY),
+    new Two.Vector(30, skipY - 10),
+    new Two.Vector(30, skipY + 10)
+  ]
+
+  const frontVertices = [
+    new Two.Vector(width - 15, skipY),
+    new Two.Vector(width - 30, skipY - 10),
+    new Two.Vector(width - 30, skipY + 10)
+  ]
+
+  let backSkip = two.makePath(backVertices, true)
+  backSkip.fill = 'blue'
+  backSkip.linewidth = 0
+
+  let frontSkip = two.makePath(frontVertices, true)
+  frontSkip.fill = 'blue'
+  frontSkip.linewidth = 0
+}
+
+function inBackSkip(x, y) {
+  const skipY = 4*height/5
+  return inTriangle(x, y, 15, skipY, 30, skipY - 10, 30, skipY + 10)
+}
+
+function inFrontSkip(x, y) {
+  const skipY = 4*height/5
+  return inTriangle(x, y, width - 15, skipY, width - 30, skipY - 10, width - 30, skipY + 10)
 }
