@@ -116,10 +116,7 @@ function drawTick(x, ticksDrawn) {
 function mousePressed(event) {
   if (event.clientY > window.innerHeight - height) {
     prevX = event.clientX
-    if (mouseX > targetPosition - targetSize &&
-      mouseX < targetPosition + targetSize &&
-      mouseY > (height/2) - targetSize &&
-      mouseY < height/2 + targetSize) {
+    if (inTarget(mouseX, mouseY)) {
       targetDrag = true
     } else {
       timelineDrag = true
@@ -128,7 +125,26 @@ function mousePressed(event) {
 
 }
 
-function mouseReleased(event) {
+function triangleArea(x1, y1, x2, y2, x3, y3) {
+  return Math.abs((x1*(y2-y3) + x2*(y3-y1)+ x3*(y1-y2))/2.0)
+}
+
+function inTriangle(x, y, x1, y1, x2, y2, x3, y3) {
+  let A = Math.round(triangleArea(x1, y1, x2, y2, x3, y3))
+  let A1 = triangleArea(x, y, x2, y2, x3, y3)
+  let A2 = triangleArea(x1, y1, x, y, x3, y3)
+  let A3 = triangleArea(x1, y1, x2, y2, x, y)
+  return (A == Math.round(A1 + A2 + A3))
+}
+
+function inTarget(x, y) {
+  let inTargetCircle = (x - targetPosition)**2 + (y - height/2)**2 < targetSize**2
+  let inTopTriangle = inTriangle(x, y, targetPosition, height/2 - 25, targetPosition - 5, height/2 - 35, targetPosition + 5, height/2 - 35)
+  let inBottomTriangle = inTriangle(x, y, targetPosition, height/2 + 25, targetPosition - 5, height/2 + 35, targetPosition + 5, height/2 + 35)
+  return inTargetCircle || inTopTriangle || inBottomTriangle
+}
+
+function mouseReleased(_event) {
   timelineDrag = false
   targetDrag = false
 }
@@ -177,13 +193,13 @@ function target() {
   // targetLine.linewidth = 1.5
 
   const bottomVertices = [
-    new Two.Vector(targetPosition, height / 2 + 25),
+    new Two.Vector(targetPosition, height/2 + 25),
     new Two.Vector(targetPosition - 5, height/2 + 35),
     new Two.Vector(targetPosition + 5, height/2 + 35)
   ]
 
   const topVertices = [
-    new Two.Vector(targetPosition, height / 2 - 25),
+    new Two.Vector(targetPosition, height/2 - 25),
     new Two.Vector(targetPosition - 5, height/2 - 35),
     new Two.Vector(targetPosition + 5, height/2 - 35)
   ]
@@ -211,4 +227,3 @@ function target() {
   two.makeText(Math.abs(targetYear) + (targetBCE ? " BCE" : " CE"), targetPosition, height/2 + 50)
 
 }
-
