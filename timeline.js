@@ -7,32 +7,25 @@ timelineContainer.onwheel = zoom
 
 let width = timelineContainer.offsetWidth
 let height = window.innerHeight/5 // Hardcoded, change based on index.html
-
-const tickSize = 10, tickWidth = 2
-const minSpcBtwn = 30, maxSpcBtwn = 400
-
-let spcBtwn = 50, numTick = width/spcBtwn
+let frameY = window.innerHeight - height
 
 let currentDate = new Date(), currentYear = currentDate.getFullYear()
 
-let prevX = 0
+const tickSize = 10, tickWidth = 2
+const minSpcBtwn = 30, maxSpcBtwn = 400
+let spcBtwn = 50, numTick = width/spcBtwn, tickIncr = 1
+
+let prevX = 0, mouseX = 0, mouseY = 0
+let leftX = 0, leftYear = 1975
+let bce = false
 
 let timelineDrag = false, targetDrag = false
+let targetPosition = 100
 const targetSize = 5
 
 let zoomRatio = -0.01
 
-let tickIncr = 1
-
 let two
-
-let leftX = 0, leftYear = 1975
-let bce = false
-
-let targetPosition = 100
-
-let frameY = window.innerHeight - height
-let mouseX = 0, mouseY = 0
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -170,8 +163,8 @@ function mouseReleased(event) {
     skipFrontCount %= 3
     skipFrontCount++
     leftYear += skipFrontCount * 5
-    if (currentYear < leftYear + numTick) {
-      leftYear = Math.round(currentYear - numTick) + 1
+    if (currentYear < leftYear + numTick * tickIncr) {
+      leftYear = Math.round(currentYear - numTick * tickIncr) + 1
     }
   }
   timelineDrag = false
@@ -185,7 +178,7 @@ function mouseMoved(event) {
   mouseY = event.clientY - frameY
   if (timelineDrag) {
     let tempX = leftX + mouseX - prevX
-    leftX = (tempX < 0 && currentYear < leftYear + numTick) ? 0 : tempX
+    leftX = (tempX < 0 && currentYear < leftYear + numTick * tickIncr) ? 0 : tempX
     prevX = mouseX
   }
 }
@@ -211,7 +204,7 @@ function zoom(event) {
 }
 
 function target() {
-  let target = two.makeCircle(targetPosition, height/2, 5)
+  let target = two.makeCircle(targetPosition, height/2, targetSize)
   target.stroke = 'red'
   // let targetLine = two.makeLine(targetPosition, height/2 + 30, targetPosition, height/2 - 30)
   // targetLine.stroke = 'red'
