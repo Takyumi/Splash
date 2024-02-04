@@ -12,11 +12,13 @@ let frameY = window.innerHeight - height
 let currentDate = new Date(), currentYear = currentDate.getFullYear()
 
 const tickSize = 10, tickWidth = 2
-const minSpcBtwn = 30, maxSpcBtwn = 400
-let spcBtwn = 50, numTick = width/spcBtwn, tickIncr = 1
+let spcBtwn = 50, numTick = width / spcBtwn
+let tickYears = [1, 10, 100, 1000, 1000000], tickYearIdx = 0
+let minSpcBtwns = [30, 30, 30, 30, width/5]
+let maxSpcBtwns = [width/4, 300, 300, 300, width/2]
 
 let prevX = 0, mouseX = 0, mouseY = 0
-let leftX = 0, leftYear = 1975
+let leftX = 0, leftYear = 0
 let bce = false
 
 let timelineDrag = false, targetDrag = false
@@ -56,7 +58,9 @@ function resize() {
   two.width = width
   two.height = height
 
-  numTick = width/spcBtwn
+  bce = (tickYearIdx == 0) ? (leftYear <= 0) : (leftYear < 0)
+
+  numTick = width / spcBtwn
 }
 
 function draw() {
@@ -71,36 +75,36 @@ function draw() {
 
   while (leftX < 0) {
     leftX += spcBtwn
-    leftYear += bce ? -tickIncr : tickIncr
+    leftYear += tickYears[tickYearIdx]
   }
   while (leftX >= spcBtwn) {
     leftX -= spcBtwn
-    leftYear -= bce ? -tickIncr : tickIncr
+    leftYear -= tickYears[tickYearIdx]
   }
-  if (leftYear == 0) {
-    bce = !bce
-    leftYear = 1
-  }
+  leftYear = Math.floor(leftYear / tickYears[tickYearIdx]) * tickYears[tickYearIdx]
+  bce = (tickYearIdx == 0) ? (leftYear <= 0) : (leftYear < 0)
 
   tickBuffer = 0
   for (let i = 0; i <= numTick; i++) {
     drawTick(leftX + (i * spcBtwn), i);
   }
 
+  console.log(leftX)
+
   // let rcircle = two.makeCircle(leftX, height / 2, 5)
   // rcircle.stroke = 'blue'
 
   target()
-  skip()
 }
 
 let tickBuffer = 0
 
 function drawTick(x, ticksDrawn) {
-  let tickYear = Math.abs(leftYear + (bce ? -ticksDrawn : ticksDrawn) - tickBuffer)
+  let tickYear = leftYear + ticksDrawn * tickYears[tickYearIdx] - tickBuffer
   if (tickYear == 0) {
-    tickBuffer = 1
-    tickYear = 1
+    tickYear = (tickYearIdx == 0) ? -1 : 1
+  } else if (tickYear < 0 && tickYearIdx == 0) {
+    tickYear -= tickYears[tickYearIdx]
   }
 
   if (tickYear <= currentYear) {
@@ -108,12 +112,9 @@ function drawTick(x, ticksDrawn) {
     tick.stroke = 'black'
     tick.linewidth = tickWidth
 
-    two.makeText(tickYear, x, height/2 + 20)
+    two.makeText(Math.abs(tickYear), x, height/2 + 20)
   }
 }
-
-let skipBackCount = 0, skipFrontCount = 0
-let skipBack = false, skipFront = false
 
 function mousePressed(event) {
   mouseX = event.clientX
@@ -122,10 +123,6 @@ function mousePressed(event) {
     prevX = mouseX
     if (inTarget(mouseX, mouseY)) {
       targetDrag = true
-    } else if (inBackSkip(mouseX, mouseY)) {
-      skipBack = true
-    } else if (inFrontSkip(mouseX, mouseY)) {
-      skipFront = true
     } else {
       timelineDrag = true
     }
@@ -155,22 +152,8 @@ function inTarget(x, y) {
 function mouseReleased(event) {
   mouseX = event.clientX
   mouseY = event.clientY - frameY
-  if (skipBack && inBackSkip(mouseX, mouseY)) {
-    skipBackCount %= 3
-    skipBackCount++
-    leftYear -= skipBackCount * 5
-  } else if (skipFront && inFrontSkip(mouseX, mouseY)) {
-    skipFrontCount %= 3
-    skipFrontCount++
-    leftYear += skipFrontCount * 5
-    if (currentYear < leftYear + numTick * tickIncr) {
-      leftYear = Math.round(currentYear - numTick * tickIncr) + 1
-    }
-  }
   timelineDrag = false
   targetDrag = false
-  skipBack = false
-  skipFront = false
 }
 
 function mouseMoved(event) {
@@ -178,7 +161,7 @@ function mouseMoved(event) {
   mouseY = event.clientY - frameY
   if (timelineDrag) {
     let tempX = leftX + mouseX - prevX
-    leftX = (tempX < 0 && currentYear < leftYear + numTick * tickIncr) ? 0 : tempX
+    leftX = (!bce && tempX < 0 && currentYear < leftYear + numTick * tickYears[tickYearIdx]) ? 0 : tempX
     prevX = mouseX
   }
 }
@@ -188,16 +171,48 @@ function zoom(event) {
   zoomRatio = spcBtwn * -0.0002 - 0.01
 
   let prevSpcBtwn = spcBtwn
+  let prevLeftYear = leftYear
   let change = event.deltaY * zoomRatio
-  if (spcBtwn + change < minSpcBtwn) {
-    change = minSpcBtwn - spcBtwn
-    spcBtwn = minSpcBtwn
-  } else if (spcBtwn + change > maxSpcBtwn) {
-    change = maxSpcBtwn - spcBtwn
-    spcBtwn = maxSpcBtwn
+  if (prevSpcBtwn + change < minSpcBtwns[tickYearIdx] && change < 0) {
+    tickYearIdx++
+    if (tickYearIdx < tickYears.length - 1) {
+      spcBtwn = (prevSpcBtwn + change) * 10
+      console.log("zoom sb+change ", prevSpcBtwn + change, " < ", minSpcBtwns[tickYearIdx], ", new sb = ", spcBtwn, ", leftYear = ", leftYear, ", tickYears = ", tickYears[tickYearIdx], ", final year = ",  Math.ceil(leftYear / tickYears[tickYearIdx]) * tickYears[tickYearIdx])
+      leftYear = Math.ceil(leftYear / tickYears[tickYearIdx]) * tickYears[tickYearIdx]
+      leftX += (leftYear - prevLeftYear) / tickYears[tickYearIdx - 1] * prevSpcBtwn
+      if (leftYear <= 0 && tickYearIdx == 1) {
+        leftX += prevSpcBtwn
+      }
+      console.log("prev leftx = ", leftX - (leftYear - prevLeftYear) * prevSpcBtwn, ", leftx = ", leftX)
+      return
+    } else if (tickYearIdx == tickYears.length - 1) {
+      spcBtwn = width / 4.5
+    } else {
+      tickYearIdx--
+      spcBtwn = minSpcBtwns[tickYearIdx]
+    }
+    console.log("zoom sb+change ", prevSpcBtwn + change, " < ", minSpcBtwns[tickYearIdx], ", new sb = ", spcBtwn, ", leftYear = ", leftYear, ", tickYears = ", tickYears[tickYearIdx], ", final year = ", Math.floor(leftYear / tickYears[tickYearIdx]) * tickYears[tickYearIdx])
+  } else if (prevSpcBtwn + change > maxSpcBtwns[tickYearIdx] && change > 0) {
+    if (tickYearIdx > 0) {
+      tickYearIdx--
+      spcBtwn = (prevSpcBtwn + change) / 10
+      console.log("zoom sb+change ", prevSpcBtwn + change, " > ", maxSpcBtwns[tickYearIdx], ", new sb = ", spcBtwn, ",leftYear = ", leftYear, ", tickYears = ", tickYears[tickYearIdx], ", final year = ", leftYear - Math.floor(leftX / spcBtwn) * tickYears[tickYearIdx])
+      leftYear -= Math.floor(leftX / spcBtwn) * tickYears[tickYearIdx]
+      if (prevLeftYear <= 0 && tickYearIdx == 0) {
+        leftYear += tickYears[tickYearIdx]
+      }
+      leftX %= spcBtwn
+      console.log("prev leftx = ", leftX + Math.floor(leftX / spcBtwn), ", leftx = ", leftX)
+      return
+    } else {
+      spcBtwn = maxSpcBtwns[tickYearIdx]
+    }
+    console.log("zoom sb+change ", prevSpcBtwn + change, " > ", maxSpcBtwns[tickYearIdx], ", new sb = ", spcBtwn, ",leftYear = ", leftYear, ", tickYears = ", tickYears[tickYearIdx], ", final year = ", Math.floor(leftYear / tickYears[tickYearIdx]) * tickYears[tickYearIdx])
   } else {
-    spcBtwn += change
+    spcBtwn += event.deltaY * zoomRatio
   }
+  leftYear = Math.ceil(leftYear / tickYears[tickYearIdx]) * tickYears[tickYearIdx]
+  change = spcBtwn - prevSpcBtwn
 
   let dshift = change * (event.clientX - leftX) / prevSpcBtwn
   leftX -= dshift
@@ -206,9 +221,6 @@ function zoom(event) {
 function target() {
   let target = two.makeCircle(targetPosition, height/2, targetSize)
   target.stroke = 'red'
-  // let targetLine = two.makeLine(targetPosition, height/2 + 30, targetPosition, height/2 - 30)
-  // targetLine.stroke = 'red'
-  // targetLine.linewidth = 1.5
 
   const bottomVertices = [
     new Two.Vector(targetPosition, height/2 + 25),
@@ -235,46 +247,14 @@ function target() {
     target.fill = 'red'
   }
   
-  let yearDiff = Math.floor((targetPosition - leftX) / spcBtwn)
-  let targetYear = leftYear + (bce ? -yearDiff : yearDiff)
-  let targetBCE = bce
-  if (targetYear <= 0) {
-    targetYear -= 1
-    targetBCE = !targetBCE
+  let yearDiff = Math.floor((targetPosition - leftX) * tickYears[tickYearIdx] / spcBtwn)
+  let targetYear = leftYear + yearDiff
+  if (targetYear == 0) {
+    targetYear = (tickYearIdx == 0) ? -1 : 1
+  } else if (targetYear < 0 && tickYearIdx == 0) {
+    targetYear -= tickYears[tickYearIdx]
   }
+  let targetBCE = (tickYearIdx == 0) ? (targetYear <= 0) : (targetYear < 0)
   two.makeText(Math.abs(targetYear) + (targetBCE ? " BCE" : " CE"), targetPosition, height/2 + 50)
 }
 
-function skip() {
-  const skipY = 4*height/5
-
-  const backVertices = [
-    new Two.Vector(15, skipY),
-    new Two.Vector(30, skipY - 10),
-    new Two.Vector(30, skipY + 10)
-  ]
-
-  const frontVertices = [
-    new Two.Vector(width - 15, skipY),
-    new Two.Vector(width - 30, skipY - 10),
-    new Two.Vector(width - 30, skipY + 10)
-  ]
-
-  let backSkip = two.makePath(backVertices, true)
-  backSkip.fill = 'blue'
-  backSkip.linewidth = 0
-
-  let frontSkip = two.makePath(frontVertices, true)
-  frontSkip.fill = 'blue'
-  frontSkip.linewidth = 0
-}
-
-function inBackSkip(x, y) {
-  const skipY = 4*height/5
-  return inTriangle(x, y, 15, skipY, 30, skipY - 10, 30, skipY + 10)
-}
-
-function inFrontSkip(x, y) {
-  const skipY = 4*height/5
-  return inTriangle(x, y, width - 15, skipY, width - 30, skipY - 10, width - 30, skipY + 10)
-}
