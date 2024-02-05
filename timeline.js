@@ -1,4 +1,5 @@
 import './tailwind.css'
+import { updateYear } from "./targetYear.js";
 import Two from 'https://cdn.skypack.dev/two.js@latest'
 
 const timelineContainer = document.querySelector('#timelineContainer')
@@ -24,6 +25,8 @@ let bce = false
 let timelineDrag = false, targetDrag = false
 let targetPosition = 100
 const targetSize = 5
+
+globalThis.yearString = Math.floor(leftYear + (targetPosition/spcBtwn)) + (bce ? " BCE" : " CE")
 
 let zoomRatio = -0.01
 
@@ -89,8 +92,6 @@ function draw() {
     drawTick(leftX + (i * spcBtwn), i);
   }
 
-  console.log(leftX)
-
   // let rcircle = two.makeCircle(leftX, height / 2, 5)
   // rcircle.stroke = 'blue'
 
@@ -127,7 +128,6 @@ function mousePressed(event) {
       timelineDrag = true
     }
   }
-
 }
 
 function triangleArea(x1, y1, x2, y2, x3, y3) {
@@ -176,38 +176,32 @@ function zoom(event) {
   if (prevSpcBtwn + change < minSpcBtwns[tickYearIdx] && change < 0) {
     tickYearIdx++
     if (tickYearIdx < tickYears.length - 1) {
-      spcBtwn = (prevSpcBtwn + change) * 10
-      console.log("zoom sb+change ", prevSpcBtwn + change, " < ", minSpcBtwns[tickYearIdx], ", new sb = ", spcBtwn, ", leftYear = ", leftYear, ", tickYears = ", tickYears[tickYearIdx], ", final year = ",  Math.ceil(leftYear / tickYears[tickYearIdx]) * tickYears[tickYearIdx])
+      spcBtwn = (prevSpcBtwn) * 10
       leftYear = Math.ceil(leftYear / tickYears[tickYearIdx]) * tickYears[tickYearIdx]
       leftX += (leftYear - prevLeftYear) / tickYears[tickYearIdx - 1] * prevSpcBtwn
       if (leftYear <= 0 && tickYearIdx == 1) {
         leftX += prevSpcBtwn
       }
-      console.log("prev leftx = ", leftX - (leftYear - prevLeftYear) * prevSpcBtwn, ", leftx = ", leftX)
       return
-    } else if (tickYearIdx == tickYears.length - 1) {
+    }
+    if (tickYearIdx == tickYears.length - 1) {
       spcBtwn = width / 4.5
     } else {
       tickYearIdx--
       spcBtwn = minSpcBtwns[tickYearIdx]
     }
-    console.log("zoom sb+change ", prevSpcBtwn + change, " < ", minSpcBtwns[tickYearIdx], ", new sb = ", spcBtwn, ", leftYear = ", leftYear, ", tickYears = ", tickYears[tickYearIdx], ", final year = ", Math.floor(leftYear / tickYears[tickYearIdx]) * tickYears[tickYearIdx])
   } else if (prevSpcBtwn + change > maxSpcBtwns[tickYearIdx] && change > 0) {
     if (tickYearIdx > 0) {
       tickYearIdx--
-      spcBtwn = (prevSpcBtwn + change) / 10
-      console.log("zoom sb+change ", prevSpcBtwn + change, " > ", maxSpcBtwns[tickYearIdx], ", new sb = ", spcBtwn, ",leftYear = ", leftYear, ", tickYears = ", tickYears[tickYearIdx], ", final year = ", leftYear - Math.floor(leftX / spcBtwn) * tickYears[tickYearIdx])
+      spcBtwn = (prevSpcBtwn) / 10
       leftYear -= Math.floor(leftX / spcBtwn) * tickYears[tickYearIdx]
       if (prevLeftYear <= 0 && tickYearIdx == 0) {
         leftYear += tickYears[tickYearIdx]
       }
       leftX %= spcBtwn
-      console.log("prev leftx = ", leftX + Math.floor(leftX / spcBtwn), ", leftx = ", leftX)
       return
-    } else {
-      spcBtwn = maxSpcBtwns[tickYearIdx]
     }
-    console.log("zoom sb+change ", prevSpcBtwn + change, " > ", maxSpcBtwns[tickYearIdx], ", new sb = ", spcBtwn, ",leftYear = ", leftYear, ", tickYears = ", tickYears[tickYearIdx], ", final year = ", Math.floor(leftYear / tickYears[tickYearIdx]) * tickYears[tickYearIdx])
+    spcBtwn = maxSpcBtwns[tickYearIdx]
   } else {
     spcBtwn += event.deltaY * zoomRatio
   }
@@ -255,6 +249,9 @@ function target() {
     targetYear -= tickYears[tickYearIdx]
   }
   let targetBCE = (tickYearIdx == 0) ? (targetYear <= 0) : (targetYear < 0)
+  globalThis.targetYear = Math.abs(targetYear)
+  globalThis.targetBCE = targetBCE ? "BCE" : "CE"
+  updateYear()
   two.makeText(Math.abs(targetYear) + (targetBCE ? " BCE" : " CE"), targetPosition, height/2 + 50)
 }
 

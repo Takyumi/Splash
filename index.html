@@ -7,8 +7,8 @@
     <title>Vite App</title>
     <!-- <link href="tailwind.css" rel="stylesheet" /> -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@1,600&family=Lato&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@1,600&family=Lato&family=Spline+Sans+Mono&display=swap" rel="stylesheet">
     <style>
       body {
         margin: 0;
@@ -17,8 +17,11 @@
       .font-exo {
         font-family: 'Exo 2', sans-serif;
       }
-      .font-exo {
+      .font-lato {
         font-family: 'Lato', sans-serif;
+      }
+      .font-spline {
+        font-family: 'Spline Sans Mono', sans-serif;
       }
     </style>
   </head>
@@ -30,8 +33,8 @@
       </h2>
       <p id = "populationValueEl" class = "text-white font-bold text-lg">300mil</p>
     </div>
-    <div id="year" class="fixed">
-      <h2 class = "text-black text-lg"></h2>
+    <div id="year" class="fixed bg-white rounded-2xl shadow-lg">
+      <h2></h2>
     </div>
     <div class="xl:flex-col h-screen">
 
@@ -45,6 +48,7 @@
     
     </div>
     <script type="module" src="/globe.js"></script>
+    <script type="module" src="/targetYear.js"></script>
     <script type="module" src="/timeline.js"></script>
     
   </body>
