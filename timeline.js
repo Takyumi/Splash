@@ -12,7 +12,7 @@ let frameY = window.innerHeight - height
 
 let currentDate = new Date(), currentYear = currentDate.getFullYear()
 
-const tickSize = 10, tickWidth = 2
+const tickSize = 5, tickWidth = 1.7
 let spcBtwn = 50, numTick = width / spcBtwn
 let tickYears = [1, 10, 100, 1000, 1000000], tickYearIdx = 0
 let minSpcBtwns = [30, 30, 30, 30, width/5]
@@ -30,6 +30,11 @@ globalThis.yearString = Math.floor(leftYear + (targetPosition/spcBtwn)) + (bce ?
 
 let zoomRatio = -0.01
 
+var amplitude = 8
+var frequency = 10
+var points = 100
+//var waveLength = width / frequency
+
 let two
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -45,6 +50,11 @@ document.addEventListener('DOMContentLoaded', () => {
   resize()
 
   two.bind('update', draw)
+  // two.bind('update', function(frameCount) {
+  //   wavePink.vertices.forEach(function(vertex, i) {
+  //       vertex.y = height / 2 + amplitude * Math.sin(((i / points) * Math.PI * frequency) + (frameCount * 0.01));
+  //   });
+  // });
   two.play()
 
   document.addEventListener('mousedown', mousePressed)
@@ -72,9 +82,17 @@ function draw() {
   currentDate = new Date()
   currentYear = currentDate.getFullYear()
 
-  let mainLine = two.makeLine(0, height / 2, width, height / 2)
-  mainLine.stroke = 'black'
-  mainLine.linewidth = 2
+  // let mainLinePink = two.makeLine(0, height / 2, width, height / 2)
+  // mainLinePink.stroke = '#F077F8'
+  // mainLinePink.linewidth = 2
+  
+  // let mainLineBlue = two.makeLine(0, height / 2 + 2, width, height / 2 + 2)
+  // mainLineBlue.stroke = '#4BBFF5'
+  // mainLineBlue.linewidth = 2
+
+  // let mainLineLightPink = two.makeLine(0, height / 2 - 2, width, height / 2 - 2)
+  // mainLineLightPink.stroke = '#FDB4E2'
+  // mainLineLightPink.linewidth = 2
 
   while (leftX < 0) {
     leftX += spcBtwn
@@ -94,6 +112,19 @@ function draw() {
 
   // let rcircle = two.makeCircle(leftX, height / 2, 5)
   // rcircle.stroke = 'blue'
+  var wavePink = new Two.Path([], false, false)
+  wavePink.noFill()
+
+  for (var i = 0; i <= points; i++) {
+    var x = (i / points) * width
+    var y = height/2 + amplitude * Math.sin((i / points) * Math.PI * frequency)
+    wavePink.vertices.push(new Two.Anchor(x,y))
+  }
+
+  wavePink.stroke = '#F077F8'
+  wavePink.linewidth = 2
+
+  two.add(wavePink)
 
   target()
 }
@@ -109,11 +140,11 @@ function drawTick(x, ticksDrawn) {
   }
 
   if (tickYear <= currentYear) {
-    let tick = two.makeLine(x, height/2 + tickSize, x, height/2 - tickSize)
+    let tick = two.makeLine(x, (height/2 - 20) + tickSize, x, (height/2 - 20) - tickSize)
     tick.stroke = 'black'
     tick.linewidth = tickWidth
 
-    two.makeText(Math.abs(tickYear), x, height/2 + 20)
+    two.makeText(Math.abs(tickYear), x, height/2 - 37)
   }
 }
 
@@ -144,8 +175,8 @@ function inTriangle(x, y, x1, y1, x2, y2, x3, y3) {
 
 function inTarget(x, y) {
   let inTargetCircle = (x - targetPosition)**2 + (y - height/2)**2 < targetSize**2
-  let inTopTriangle = inTriangle(x, y, targetPosition, height/2 - 25, targetPosition - 5, height/2 - 35, targetPosition + 5, height/2 - 35)
-  let inBottomTriangle = inTriangle(x, y, targetPosition, height/2 + 25, targetPosition - 5, height/2 + 35, targetPosition + 5, height/2 + 35)
+  let inTopTriangle = inTriangle(x, y, targetPosition, height/2 - 15, targetPosition - 8, height/2 - 25, targetPosition + 8, height/2 - 25)
+  let inBottomTriangle = inTriangle(x, y, targetPosition, height/2 + 15, targetPosition - 8, height/2 + 25, targetPosition + 8, height/2 + 25)
   return inTargetCircle || inTopTriangle || inBottomTriangle
 }
 
@@ -213,19 +244,19 @@ function zoom(event) {
 }
 
 function target() {
-  let target = two.makeCircle(targetPosition, height/2, targetSize)
-  target.stroke = 'red'
+  // let target = two.makeCircle(targetPosition, height/2, targetSize)
+  // target.stroke = 'red'
 
   const bottomVertices = [
-    new Two.Vector(targetPosition, height/2 + 25),
-    new Two.Vector(targetPosition - 5, height/2 + 35),
-    new Two.Vector(targetPosition + 5, height/2 + 35)
+    new Two.Vector(targetPosition, height/2 + 15),
+    new Two.Vector(targetPosition - 8, height/2 + 25),
+    new Two.Vector(targetPosition + 8, height/2 + 25)
   ]
 
   const topVertices = [
-    new Two.Vector(targetPosition, height/2 - 25),
-    new Two.Vector(targetPosition - 5, height/2 - 35),
-    new Two.Vector(targetPosition + 5, height/2 - 35)
+    new Two.Vector(targetPosition, height/2 - 15),
+    new Two.Vector(targetPosition - 8, height/2 - 25),
+    new Two.Vector(targetPosition + 8, height/2 - 25)
   ]
 
   let targetBottom = two.makePath(bottomVertices, true)
