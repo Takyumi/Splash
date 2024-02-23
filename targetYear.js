@@ -14,11 +14,11 @@ targetYear.style.width = width + "px"
 targetYear.style.lineHeight = height + "px"
 targetYear.style.textAlign = "center"
 targetYear.style.verticalAlign = "middle"
-targetYear.style.fontSize = "36px";
-targetYear.style.fontFamily = "Spline Sans Mono,sans-serif";
+targetYear.style.fontSize = "36px"
+targetYear.style.fontFamily = "Spline Sans Mono,sans-serif"
 
 function fontColor(str, color) {
-  return '<span style="color: ' + color + '">' + str + '</span>';
+  return '<span style="color: ' + color + '">' + str + '</span>'
 }
 
 export function updateYear() {
@@ -35,14 +35,30 @@ let drag = false
 let mouseX = 0, mouseY = 0
 let prevX = 0, prevY = 0
 
-function withinBounds(x, y) {
+function withinTargetYearBounds(x, y) {
   return x > divX && x < divX + width && y > divY && y < divY + height
 }
 
+function resizeTargetYear(_) {
+  if (divX > window.innerWidth - width) {
+    divX = window.innerWidth - width
+  }
+  if (divY > window.innerHeight - height) {
+    divY = window.innerHeight - height
+  }
+  gsap.set(targetYear, {
+    x: divX,
+    y: divY
+  })
+}
+
+export { withinTargetYearBounds, resizeTargetYear }
+
 function mousePressed(event) {
+  event.preventDefault()
   mouseX = event.clientX
   mouseY = event.clientY
-  if (withinBounds(mouseX, mouseY)) {
+  if (withinTargetYearBounds(mouseX, mouseY)) {
     prevX = mouseX
     prevY = mouseY
     drag = true

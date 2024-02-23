@@ -1,5 +1,6 @@
 import './tailwind.css'
-import { updateYear } from "./targetYear.js";
+import { updateYear, withinTargetYearBounds } from "./targetYear.js"
+import { withinLocationPinBounds } from "./locationToggle.js";
 import Two from 'https://cdn.skypack.dev/two.js@latest'
 
 const timelineContainer = document.querySelector('#timelineContainer')
@@ -119,7 +120,11 @@ function drawTick(x, ticksDrawn) {
 
 function mousePressed(event) {
   mouseX = event.clientX
-  mouseY = event.clientY - frameY
+  mouseY = event.clientY
+  if (withinTargetYearBounds(mouseX, mouseY) || withinLocationPinBounds(mouseX, mouseY)) {
+    return
+  }
+  mouseY -= frameY
   if (event.clientY > window.innerHeight - height) {
     prevX = mouseX
     if (inTarget(mouseX, mouseY)) {

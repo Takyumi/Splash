@@ -6,15 +6,14 @@ import vertexShader from "./shaders/vertex.glsl"
 import fragmentShader from "./shaders/fragment.glsl"
 import atmosphereVertexShader from "./shaders/atmosphereVertex.glsl"
 import atmosphereFragmentShader from "./shaders/atmosphereFragment.glsl"
-
-//console.log(countries)
+import { resetLocationPin } from './locationToggle'
 
 const globeContainer = document.querySelector('#globeContainer')
 globeContainer.onwheel = zoom
 
 function zoom(event) {
   event.preventDefault()
-  camera.position.z += event.deltaY * -0.005
+  camera.position.z -= event.deltaY * -0.005
   if (camera.position.z < 5.6) {
     camera.position.z = 5.6
   } else if (camera.position.z > 20) {
@@ -221,7 +220,6 @@ addEventListener('mousemove', (event) => {
     const offset = globeContainer.getBoundingClientRect().top
     mouse.x = (event.clientX / innerWidth) * 2 - 1
     mouse.y = -((event.clientY - offset) / (innerHeight * 4/5)) * 2 + 1
-
   }
 
   gsap.set(popUpEl, {
@@ -251,22 +249,52 @@ addEventListener('mousemove', (event) => {
 
 addEventListener('mouseup', (event) => {
   mouse.down = false
+
+  if (globalThis.addPin) {
+    let mouseX = 0, mouseY = 0
+    if (innerWidth >= 1280) {
+      mouseX = ((event.clientX) / (innerWidth)) * 2 - 1
+      mouseY = -(event.clientY / (innerHeight * 4/5)) * 2 + 1
+    } else {
+      const offset = globeContainer.getBoundingClientRect().top
+      mouseX = (event.clientX / innerWidth) * 2 - 1
+      mouseY = -((event.clientY - offset) / (innerHeight * 4/5)) * 2 + 1
+    }
+    console.log(mouseX, mouseY, sphere.position.z)
+
+    let pin = new THREE.Mesh(
+      new THREE.ConeGeometry(0.2, 0.5, 6, 1, false, 0.5), 
+      new THREE.MeshLambertMaterial( { color: 0x049ef4 } )
+    )
+    pin.position.x = mouseX * (camera.position.z*0.85)
+    pin.position.y = mouseY * (camera.position.z*0.5)
+    pin.position.z = 4
+    scene.add(pin)
+    globalThis.addPin = false
+    resetLocationPin()
+  }
 })
 
-addEventListener('resize', () => {
+function resizeGlobe(_) {
   renderer.setSize(globeContainer.offsetWidth, globeContainer.offsetHeight)
   camera = new THREE.PerspectiveCamera(75,globeContainer.offsetWidth / globeContainer.offsetHeight, 0.1, 1000)
   camera.position.z = 12
-})
+}
+
+function inGlobe() {
+  return raycaster.intersectObject(sphere).length > 0
+}
+
+export { inGlobe, resizeGlobe }
 
 addEventListener('touchmove', (event) => {
   event.clientX = event.touches[0].clientX
   event.clientY = event.touches[0].clientY
   
   const doesIntersect = raycaster.intersectObject(sphere)
-    if (doesIntersect.length > 0) mouse.down = true
+  if (doesIntersect.length > 0) mouse.down = true
 
-    if (mouse.down) {
+  if (mouse.down) {
     const offset = globeContainer.getBoundingClientRect().top
     mouse.x = (event.clientX / innerWidth) * 2 - 1
     mouse.y = -((event.clientY - offset) / innerHeight) * 2 + 1
