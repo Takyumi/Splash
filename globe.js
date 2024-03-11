@@ -199,8 +199,32 @@ function animate() {
 }
 animate()
 
+let pinDrag = false
+
+function getMouseSpherePos(intersects) {
+  let pos = new THREE.Vector3();
+  sphere.worldToLocal(pos.copy(intersects[0].point))
+
+  let spherical = new THREE.Spherical()
+  spherical.setFromVector3(pos)
+
+  const latitude = Math.PI / 2 - spherical.phi
+  const longitude = spherical.theta
+  const radius = 5.25
+
+  const x = radius * Math.cos(latitude) * Math.sin(longitude)
+  const y = radius * Math.sin(latitude)
+  const z = radius * Math.cos(latitude) * Math.cos(longitude)
+  
+  return new THREE.Vector3(x, y, z)
+}
+
 globeContainer.addEventListener('mousedown', ({clientX, clientY}) => {
-  mouse.down = true
+  if (inPin()) {
+    pinDrag = true
+  } else {
+    mouse.down = true
+  }
   mouse.xPrev = clientX,
   mouse.yPrev = clientY
 })
@@ -219,6 +243,14 @@ addEventListener('mousemove', (event) => {
     x: event.clientX,
     y: event.clientY
   })
+
+  if (pinDrag) {
+    const intersects = raycaster.intersectObject(sphere)
+    if (intersects.length > 0) {
+      pin.position.copy(getMouseSpherePos(intersects))
+      pin.lookAt(centerPoint.position)
+    }
+  }
 
   if (mouse.down) {
     event.preventDefault()
@@ -242,6 +274,7 @@ addEventListener('mousemove', (event) => {
 
 addEventListener('mouseup', (event) => {
   mouse.down = false
+  pinDrag = false
 
   if (globalThis.addPin) {
     createPin(event)
@@ -267,24 +300,9 @@ function createPin(event) {
       })
     )
 
-    let pos = new THREE.Vector3();
-    sphere.worldToLocal(pos.copy(intersects[0].point))
-
-    let spherical = new THREE.Spherical()
-    spherical.setFromVector3(pos)
-
-    const latitude = Math.PI / 2 - spherical.phi
-    const longitude = spherical.theta
-    const radius = 5.25
-
-    const x = radius * Math.cos(latitude) * Math.sin(longitude)
-    const y = radius * Math.sin(latitude)
-    const z = radius * Math.cos(latitude) * Math.cos(longitude)
-
-    pin.position.set(x, y, z)
+    pin.position.copy(getMouseSpherePos(intersects))
     pin.geometry.rotateX( Math.PI / 2 )
     pin.lookAt(centerPoint.position)
-    console.log(pos, intersects[0].point)
     group.add(pin)
     globalThis.addPin = false
   }
