@@ -161,6 +161,9 @@ const popUpEl = document.querySelector('#popUpEl')
 const populationEl = document.querySelector('#populationEl')
 const populationValueEl = document.querySelector('#populationValueEl')
 
+let scaleFactor = 8
+let scaleVector = new THREE.Vector3()
+
 function animate() {
   requestAnimationFrame(animate)
   renderer.render(scene, camera)
@@ -191,6 +194,11 @@ function animate() {
 
     populationEl.innerHTML = box.country
     populationValueEl.innerHTML = box.population
+  }
+
+  if (pin) {
+    let scale = scaleVector.subVectors(pin.position, camera.position).length() / scaleFactor
+    pin.scale.set(scale, scale, scale)
   }
 
   renderer.render(scene, camera)
