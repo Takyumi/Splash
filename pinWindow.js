@@ -26,25 +26,28 @@ export function createPinWindowDiv() {
 
   pinWindowDiv.style.width = width + "px"
   pinWindowDiv.style.lineHeight = height + "px"
-  pinWindowDiv.style.textAlign = "center"
   pinWindowDiv.style.fontFamily = "Spline Sans Mono,sans-serif"
   pinWindowDiv.style.visibility = "visible"
-
-  let container = document.createElement('div')
+  pinWindowDiv.style.paddingLeft = "10px"
+  pinWindowDiv.style.border = "1px solid"
 
   let pinEvent = document.createElement('h2')
   pinEvent.style.fontSize = "36px"
+  pinEvent.style.width = width + "px"
+  pinEvent.style.lineHeight = "75px"
+  pinEvent.style.verticalAlign = "text-top"
   let pinEventText = document.createTextNode("Event Name")
   pinEvent.appendChild(pinEventText)
-  container.appendChild(pinEvent)
+  pinWindowDiv.appendChild(pinEvent)
 
   let pinDescription = document.createElement('p')
   pinDescription.style.fontSize = "20px"
+  pinDescription.style.width = width + "px"
+  pinDescription.style.height = height + "px"
+  pinDescription.style.lineHeight = "25px"
   let pinDescriptionText = document.createTextNode("Event Description")
   pinDescription.appendChild(pinDescriptionText)
-  container.appendChild(pinDescription)
-
-  pinWindowDiv.appendChild(container)
+  pinWindowDiv.appendChild(pinDescription)
 
   document.body.insertBefore(pinWindowDiv, document.getElementById("year"))
   pinWindowDivs.set(newId, pinWindowDiv)
