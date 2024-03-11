@@ -7,7 +7,7 @@ import fragmentShader from "./shaders/fragment.glsl"
 import coneVertexShader from "./shaders/coneVertex.glsl"
 import coneFragmentShader from "./shaders/coneFragment.glsl"
 import { resetLocationPin } from './locationToggle'
-import { createPinWindowDiv } from './pinWindow'
+import { createPinWindowDiv, deletePinWindowDiv } from './pinWindow'
 
 const globeContainer = document.querySelector('#globeContainer')
 globeContainer.onwheel = zoom
@@ -272,17 +272,21 @@ addEventListener('mousemove', (event) => {
 
 })
 
+let pinWindowId = undefined
+
 addEventListener('mouseup', (event) => {
   mouse.down = false
   pinDrag = false
 
   if (globalThis.addPin) {
     createPin(event)
-    createPinWindowDiv()
+    pinWindowId = createPinWindowDiv()
   } else if (inPin()) {
     group.remove(pin)
     pin = undefined
     resetLocationPin()
+    deletePinWindowDiv(pinWindowId)
+    pinWindowId = undefined
   }
 })
 
