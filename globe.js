@@ -7,6 +7,7 @@ import fragmentShader from "./shaders/fragment.glsl"
 import coneVertexShader from "./shaders/coneVertex.glsl"
 import coneFragmentShader from "./shaders/coneFragment.glsl"
 import { resetLocationPin } from './locationToggle'
+import { createPinWindowDiv } from './pinWindow'
 
 const globeContainer = document.querySelector('#globeContainer')
 globeContainer.onwheel = zoom
@@ -164,9 +165,6 @@ function animate() {
   requestAnimationFrame(animate)
   renderer.render(scene, camera)
 
-  // sphere.rotation.y += 0.002
-  // sphere.rotation.x += 0.001
-
   //update the picking ray with the camera and mouse position
   raycaster.setFromCamera(mouse, camera)
   // calculate objects intersecting the picking ray
@@ -215,6 +213,8 @@ function getMouseSpherePos(intersects) {
   const x = radius * Math.cos(latitude) * Math.sin(longitude)
   const y = radius * Math.sin(latitude)
   const z = radius * Math.cos(latitude) * Math.cos(longitude)
+
+  // console.log(pos.position, x, y, z)
   
   return new THREE.Vector3(x, y, z)
 }
@@ -278,6 +278,7 @@ addEventListener('mouseup', (event) => {
 
   if (globalThis.addPin) {
     createPin(event)
+    createPinWindowDiv()
   } else if (inPin()) {
     group.remove(pin)
     pin = undefined
