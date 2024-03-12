@@ -1,5 +1,6 @@
 import './tailwind.css'
 import { updateYear, withinTargetYearBounds } from "./targetYear.js"
+import { withinPinWindowBounds } from "./pinWindow.js"
 import { withinLocationPinBounds } from "./locationToggle.js";
 import Two from 'https://cdn.skypack.dev/two.js@latest'
 
@@ -264,7 +265,9 @@ function drawTick(x, ticksDrawn) {
 function mousePressed(event) {
   mouseX = event.clientX
   mouseY = event.clientY
-  if (withinTargetYearBounds(mouseX, mouseY) || withinLocationPinBounds(mouseX, mouseY)) {
+  if (withinTargetYearBounds(mouseX, mouseY)
+    || withinLocationPinBounds(mouseX, mouseY)
+    || withinPinWindowBounds(mouseX, mouseY)) {
     return
   }
   mouseY -= frameY

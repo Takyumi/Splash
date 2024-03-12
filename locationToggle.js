@@ -1,10 +1,11 @@
 import './tailwind.css'
 import gsap from 'gsap'
-import Two from 'https://cdn.skypack.dev/two.js@latest'
+import Two from 'two.js'
 import { inGlobe } from './globe.js'
+// TODO(gracexin2003): If visible = false, globe should rotate when being dragged from locationToggle's location
 
 let windowWidth = window.innerWidth, windowHeight = window.innerHeight
-const offsetWidth = 200, offsetHeight = 450
+const offsetWidth = 200, offsetHeight = 350
 let defaultX = windowWidth - offsetWidth, defaultY = windowHeight - offsetHeight
 let divX = defaultX, divY = defaultY
 const width = 150, height = 150
@@ -23,7 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function resetLocationPin() {
   visible = true
-  locationToggle.style.display = "visible"
   
   divX = defaultX
   divY = defaultY
@@ -31,9 +31,7 @@ function resetLocationPin() {
     x: divX,
     y: divY
   })
-  
-  // locationToggle.style.border = "2px solid black"
-  
+    
   const pinHead = two.makeCircle(width/2, height/2, 50)
   pinHead.fill = '#FF8000'
   pinHead.noStroke()
@@ -80,7 +78,6 @@ function mousePressed(event) {
   event.preventDefault()
   mouseX = event.clientX
   mouseY = event.clientY
-  console.log (windowWidth)
   if (withinLocationPinBounds(mouseX, mouseY) && visible) {
     prevX = mouseX
     prevY = mouseY
@@ -96,15 +93,15 @@ function mouseReleased(event) {
     if (inGlobe()) {
       visible = false
       globalThis.addPin = true
-      locationToggle.style.display = "hidden"
-    } else {
-      divX = defaultX
-      divY = defaultY
-      gsap.set(locationToggle, {
-        x: divX,
-        y: divY
-      })
+      two.clear()
+      two.update()
     }
+    divX = defaultX
+    divY = defaultY
+    gsap.set(locationToggle, {
+      x: divX,
+      y: divY
+    })
   }
   
   drag = false

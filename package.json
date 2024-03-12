@@ -9,12 +9,13 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "vite": "^4.5.1",
+    "vite": "^4.5.2",
     "vite-plugin-string": "^1.2.2"
   },
   "dependencies": {
     "gsap": "^3.12.2",
-    "two.js": "^0.8.12"
+    "three": "^0.161.0",
+    "two.js": "^0.8.13"
   },
   "main": "counter.js",
   "author": "",

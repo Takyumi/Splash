@@ -3,7 +3,7 @@ import gsap from 'gsap'
 
 const targetYear = document.querySelector('#year')
 
-let divX = 100, divY = 100
+let divX = 50, divY = 490
 const width = 200, height = 92
 
 gsap.set(targetYear, {

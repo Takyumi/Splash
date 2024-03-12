@@ -1,12 +1,13 @@
 import './tailwind.css'
 import gsap from 'gsap'
-import * as THREE from "https://unpkg.com/three@0.158.0/build/three.module.js"
+import * as THREE from 'three'
 import countries from './countries.json'
 import vertexShader from "./shaders/vertex.glsl"
 import fragmentShader from "./shaders/fragment.glsl"
-import atmosphereVertexShader from "./shaders/atmosphereVertex.glsl"
-import atmosphereFragmentShader from "./shaders/atmosphereFragment.glsl"
+import coneVertexShader from "./shaders/coneVertex.glsl"
+import coneFragmentShader from "./shaders/coneFragment.glsl"
 import { resetLocationPin } from './locationToggle'
+import { createPinWindowDiv, deletePinWindowDiv } from './pinWindow'
 
 const globeContainer = document.querySelector('#globeContainer')
 globeContainer.onwheel = zoom
@@ -47,29 +48,23 @@ const sphere = new THREE.Mesh(
   })
 )
 
-//create atmosphere
-const atmosphere = new THREE.Mesh(
-  new THREE.SphereGeometry(5, 50, 50),
-  new THREE.ShaderMaterial({
-    vertexShader: atmosphereVertexShader,
-    fragmentShader: atmosphereFragmentShader,
-    blending: THREE.AdditiveBlending,
-    side: THREE.BackSide
-  })
-)
-
-atmosphere.scale.set(1.1, 1.1, 1.1)
-
-scene.add(atmosphere)
+let pin = undefined
 
 const group = new THREE.Group()
 group.add(sphere)
 scene.add(group)
 
-const starGeometry = new THREE.
-  BufferGeometry()
-const starMaterial = new THREE.
-  PointsMaterial({
+let centerPoint = new THREE.Mesh(
+  new THREE.SphereGeometry(1, 24, 12),
+  new THREE.MeshBasicMaterial({
+    color: 0xffff00
+  })
+)
+centerPoint.position.set(0, 0, 0);
+group.add(centerPoint)
+
+const starGeometry = new THREE.BufferGeometry()
+const starMaterial = new THREE.PointsMaterial({
   color: 0xffffff
 })
 
@@ -148,8 +143,6 @@ function createBoxes(countries) {
 
 createBoxes(countries)
 
-sphere.rotation.y = -Math.PI / 2
-
 group.rotation.offset = {
   x: 0,
   y: 0
@@ -168,11 +161,12 @@ const popUpEl = document.querySelector('#popUpEl')
 const populationEl = document.querySelector('#populationEl')
 const populationValueEl = document.querySelector('#populationValueEl')
 
+let scaleFactor = 8
+let scaleVector = new THREE.Vector3()
+
 function animate() {
   requestAnimationFrame(animate)
   renderer.render(scene, camera)
-  //.rotation.y += 0.002
-  //sphere.rotation.x += 0.001
 
   //update the picking ray with the camera and mouse position
   raycaster.setFromCamera(mouse, camera)
@@ -202,12 +196,43 @@ function animate() {
     populationValueEl.innerHTML = box.population
   }
 
+  if (pin) {
+    let scale = scaleVector.subVectors(pin.position, camera.position).length() / scaleFactor
+    pin.scale.set(scale, scale, scale)
+  }
+
   renderer.render(scene, camera)
 }
 animate()
 
+let pinDrag = false
+
+function getMouseSpherePos(intersects) {
+  let pos = new THREE.Vector3();
+  sphere.worldToLocal(pos.copy(intersects[0].point))
+
+  let spherical = new THREE.Spherical()
+  spherical.setFromVector3(pos)
+
+  const latitude = Math.PI / 2 - spherical.phi
+  const longitude = spherical.theta
+  const radius = 5.25
+
+  const x = radius * Math.cos(latitude) * Math.sin(longitude)
+  const y = radius * Math.sin(latitude)
+  const z = radius * Math.cos(latitude) * Math.cos(longitude)
+
+  // console.log(pos.position, x, y, z)
+  
+  return new THREE.Vector3(x, y, z)
+}
+
 globeContainer.addEventListener('mousedown', ({clientX, clientY}) => {
-  mouse.down = true
+  if (inPin()) {
+    pinDrag = true
+  } else {
+    mouse.down = true
+  }
   mouse.xPrev = clientX,
   mouse.yPrev = clientY
 })
@@ -226,6 +251,14 @@ addEventListener('mousemove', (event) => {
     x: event.clientX,
     y: event.clientY
   })
+
+  if (pinDrag) {
+    const intersects = raycaster.intersectObject(sphere)
+    if (intersects.length > 0) {
+      pin.position.copy(getMouseSpherePos(intersects))
+      pin.lookAt(centerPoint.position)
+    }
+  }
 
   if (mouse.down) {
     event.preventDefault()
@@ -247,33 +280,46 @@ addEventListener('mousemove', (event) => {
 
 })
 
+let pinWindowId = undefined
+
 addEventListener('mouseup', (event) => {
   mouse.down = false
+  pinDrag = false
 
   if (globalThis.addPin) {
-    let mouseX = 0, mouseY = 0
-    if (innerWidth >= 1280) {
-      mouseX = ((event.clientX) / (innerWidth)) * 2 - 1
-      mouseY = -(event.clientY / (innerHeight * 4/5)) * 2 + 1
-    } else {
-      const offset = globeContainer.getBoundingClientRect().top
-      mouseX = (event.clientX / innerWidth) * 2 - 1
-      mouseY = -((event.clientY - offset) / (innerHeight * 4/5)) * 2 + 1
-    }
-    console.log(mouseX, mouseY, sphere.position.z)
-
-    let pin = new THREE.Mesh(
-      new THREE.ConeGeometry(0.2, 0.5, 6, 1, false, 0.5), 
-      new THREE.MeshLambertMaterial( { color: 0x049ef4 } )
-    )
-    pin.position.x = mouseX * (camera.position.z*0.85)
-    pin.position.y = mouseY * (camera.position.z*0.5)
-    pin.position.z = 4
-    scene.add(pin)
-    globalThis.addPin = false
+    createPin(event)
+    pinWindowId = createPinWindowDiv()
+  } else if (inPin()) {
+    group.remove(pin)
+    pin = undefined
     resetLocationPin()
+    deletePinWindowDiv(pinWindowId)
+    pinWindowId = undefined
   }
 })
+
+function createPin(event) {
+  const offset = globeContainer.getBoundingClientRect().top
+  mouse.x = (event.clientX / innerWidth) * 2 - 1
+  mouse.y = -((event.clientY - offset) / innerHeight) * 2 + 1
+
+  const intersects = raycaster.intersectObject(sphere)
+  if (intersects.length > 0) {
+    pin = new THREE.Mesh(
+      new THREE.ConeGeometry(0.2, 0.5, 6, 1, false, 0.5), 
+      new THREE.ShaderMaterial({
+        vertexShader: coneVertexShader,
+        fragmentShader: coneFragmentShader
+      })
+    )
+
+    pin.position.copy(getMouseSpherePos(intersects))
+    pin.geometry.rotateX( Math.PI / 2 )
+    pin.lookAt(centerPoint.position)
+    group.add(pin)
+    globalThis.addPin = false
+  }
+}
 
 function resizeGlobe(_) {
   renderer.setSize(globeContainer.offsetWidth, globeContainer.offsetHeight)
@@ -285,6 +331,10 @@ function inGlobe() {
   return raycaster.intersectObject(sphere).length > 0
 }
 
+function inPin() {
+  return pin ? raycaster.intersectObject(pin).length > 0 : false
+}
+
 export { inGlobe, resizeGlobe }
 
 addEventListener('touchmove', (event) => {
@@ -292,6 +342,7 @@ addEventListener('touchmove', (event) => {
   event.clientY = event.touches[0].clientY
   
   const doesIntersect = raycaster.intersectObject(sphere)
+  
   if (doesIntersect.length > 0) mouse.down = true
 
   if (mouse.down) {
