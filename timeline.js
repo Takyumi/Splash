@@ -1,5 +1,6 @@
 import './tailwind.css'
 import { updateYear, withinTargetYearBounds } from "./targetYear.js"
+import { withinPinWindowBounds } from "./pinWindow.js"
 import { withinLocationPinBounds } from "./locationToggle.js";
 import Two from 'https://cdn.skypack.dev/two.js@latest'
 
@@ -31,10 +32,20 @@ globalThis.yearString = Math.floor(leftYear + (targetPosition/spcBtwn)) + (bce ?
 
 let zoomRatio = -0.01
 
-var amplitude = 8
+var amplitudeCounter = 0
+var amplitudePink = 0
+var amplitudeBlue = 8
+var amplitudeWhite = 5
 var frequency = 10
 var points = 100
-//var waveLength = width / frequency
+
+var counter = 0
+
+var amplitudePinkIncrease = true
+var amplitudeBlueIncrease = true
+var amplitudeWhiteIncrease = true
+
+var gradientx1 = 0, gradienty1 = height/2, gradientx2 = width/2, gradienty2 = height/2
 
 let two
 
@@ -51,11 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
   resize()
 
   two.bind('update', draw)
-  // two.bind('update', function(frameCount) {
-  //   wavePink.vertices.forEach(function(vertex, i) {
-  //       vertex.y = height / 2 + amplitude * Math.sin(((i / points) * Math.PI * frequency) + (frameCount * 0.01));
-  //   });
-  // });
+  
   two.play()
 
   document.addEventListener('mousedown', mousePressed)
@@ -83,18 +90,6 @@ function draw() {
   currentDate = new Date()
   currentYear = currentDate.getFullYear()
 
-  // let mainLinePink = two.makeLine(0, height / 2, width, height / 2)
-  // mainLinePink.stroke = '#F077F8'
-  // mainLinePink.linewidth = 2
-  
-  // let mainLineBlue = two.makeLine(0, height / 2 + 2, width, height / 2 + 2)
-  // mainLineBlue.stroke = '#4BBFF5'
-  // mainLineBlue.linewidth = 2
-
-  // let mainLineLightPink = two.makeLine(0, height / 2 - 2, width, height / 2 - 2)
-  // mainLineLightPink.stroke = '#FDB4E2'
-  // mainLineLightPink.linewidth = 2
-
   while (leftX < 0) {
     leftX += spcBtwn
     leftYear += tickYears[tickYearIdx]
@@ -111,21 +106,139 @@ function draw() {
     drawTick(leftX + (i * spcBtwn), i);
   }
 
+  var amplitudeOffset = Math.random()
+
   // let rcircle = two.makeCircle(leftX, height / 2, 5)
   // rcircle.stroke = 'blue'
+
   var wavePink = new Two.Path([], false, false)
   wavePink.noFill()
 
+  var wavePink2 = new Two.Path([], false, false)
+  wavePink2.noFill()
+
+  var waveBlue = new Two.Path([], false, false)
+  waveBlue.noFill()
+
+  var waveBlue2 = new Two.Path([], false, false)
+  waveBlue2.noFill()
+
+  var waveWhite = new Two.Path([], false, false)
+  waveWhite.noFill()
+
+  var waveWhite2 = new Two.Path([], false, false)
+  waveWhite2.noFill()
+
+  amplitudeCounter += 1
+  counter += 0.1
+
+  if (amplitudeCounter == 5){
+    if (amplitudePink <= -5){
+      amplitudePinkIncrease = true
+    } else if (amplitudePink >= 5){
+      amplitudePinkIncrease = false
+    }
+
+    if (amplitudeBlue <= -5){
+      amplitudeBlueIncrease = true
+    } else if (amplitudeBlue >= 5){
+      amplitudeBlueIncrease = false
+    }
+
+    if (amplitudeWhite <= -5){
+      amplitudeWhiteIncrease = true
+    } else if (amplitudeWhite >= 5){
+      amplitudeWhiteIncrease = false
+    }
+
+    if (amplitudePinkIncrease == true){
+      amplitudePink += amplitudeOffset
+    } else {
+      amplitudePink -= amplitudeOffset
+    }
+
+    if (amplitudeBlueIncrease == true){
+      amplitudeBlue += amplitudeOffset
+    } else {
+      amplitudeBlue -= amplitudeOffset
+    }
+
+    if (amplitudeWhiteIncrease == true){
+      amplitudeWhite += amplitudeOffset
+    } else {
+      amplitudeWhite -= amplitudeOffset
+    }
+    
+    amplitudeCounter = 0
+  }
+
+  if (counter >= width) {
+    counter = 0
+  }
+
+  // console.log(counter)
+  // console.log(width)
+
   for (var i = 0; i <= points; i++) {
-    var x = (i / points) * width
-    var y = height/2 + amplitude * Math.sin((i / points) * Math.PI * frequency)
+    var x = (i / points) * (width*2) + counter + 100
+    var y = height/2 + amplitudePink * Math.sin((i / points) * Math.PI * frequency)
     wavePink.vertices.push(new Two.Anchor(x,y))
   }
 
-  wavePink.stroke = '#F077F8'
-  wavePink.linewidth = 2
+  for (var i = 0; i <= points; i++) {
+    var x = -(i / points) * (width*2) + counter + 100
+    var y = height/2 + amplitudePink * -Math.sin((i / points) * Math.PI * frequency)
+    wavePink2.vertices.push(new Two.Anchor(x,y))
+  }
 
+  for (var i = 0; i <= points; i++) {
+    var x = (i / points) * (width*2) + (counter*2) + 20
+    var y = height/2 + amplitudeBlue * Math.sin((i / points) * Math.PI * frequency)
+    waveBlue.vertices.push(new Two.Anchor(x,y))
+  }
+
+  for (var i = 0; i <= points; i++) {
+    var x = -(i / points) * (width*2) + (counter*2) + 20
+    var y = height/2 + amplitudeBlue * -Math.sin((i / points) * Math.PI * frequency)
+    waveBlue2.vertices.push(new Two.Anchor(x,y))
+  }
+
+  for (var i = 0; i <= points; i++) {
+    var x = (i / points) * (width*2) + (counter*1.5)
+    var y = height/2 + amplitudeWhite * Math.sin((i / points) * Math.PI * frequency)
+    waveWhite.vertices.push(new Two.Anchor(x,y))
+  }
+
+  for (var i = 0; i <= points; i++) {
+    var x = -(i / points) * (width*2) + (counter*1.5)
+    var y = height/2 + amplitudeWhite * -Math.sin((i / points) * Math.PI * frequency)
+    waveWhite2.vertices.push(new Two.Anchor(x,y))
+  }
+
+  wavePink.stroke = '#F077F8'
+  wavePink.linewidth = 1.5
+
+  wavePink2.stroke = '#F077F8'
+  wavePink2.linewidth = 1.5
+
+  waveBlue.stroke = '#4BBFF5'
+  waveBlue.linewidth = 1.5
+
+  waveBlue2.stroke = '#4BBFF5'
+  waveBlue2.linewidth = 1.5
+
+  waveWhite.stroke = 'white'
+  waveWhite.linewidth = 1
+
+  waveWhite2.stroke = 'white'
+  waveWhite2.linewidth = 1
+
+  two.add(waveWhite)
+  two.add(waveWhite2)
   two.add(wavePink)
+  two.add(wavePink2)
+  two.add(waveBlue)
+  two.add(waveBlue2)
 
   target()
 }
@@ -152,7 +265,9 @@ function drawTick(x, ticksDrawn) {
 function mousePressed(event) {
   mouseX = event.clientX
   mouseY = event.clientY
-  if (withinTargetYearBounds(mouseX, mouseY) || withinLocationPinBounds(mouseX, mouseY)) {
+  if (withinTargetYearBounds(mouseX, mouseY)
+    || withinLocationPinBounds(mouseX, mouseY)
+    || withinPinWindowBounds(mouseX, mouseY)) {
     return
   }
   mouseY -= frameY
@@ -198,6 +313,7 @@ function mouseMoved(event) {
   if (timelineDrag) {
     let tempX = leftX + mouseX - prevX
     leftX = (!bce && tempX < 0 && currentYear < leftYear + numTick * tickYears[tickYearIdx]) ? 0 : tempX
+    counter += tempX
     prevX = mouseX
   }
 }
