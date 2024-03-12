@@ -32,7 +32,7 @@ function resetLocationPin() {
     y: divY
   })
   
-  locationToggle.style.border = "2px solid black"
+  // locationToggle.style.border = "2px solid black"
   
   const pinHead = two.makeCircle(width/2, height/2, 50)
   pinHead.fill = '#FF8000'
