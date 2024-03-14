@@ -39,13 +39,13 @@ var amplitudeWhite = 5
 var frequency = 10
 var points = 100
 
-var counter = 0
+var counterPink = 0
+var counterBlue = 0
+var counterWhite = 0
 
 var amplitudePinkIncrease = true
 var amplitudeBlueIncrease = true
 var amplitudeWhiteIncrease = true
-
-var gradientx1 = 0, gradienty1 = height/2, gradientx2 = width/2, gradienty2 = height/2
 
 let two
 
@@ -130,24 +130,26 @@ function draw() {
   waveWhite2.noFill()
 
   amplitudeCounter += 1
-  counter += 0.1
+  counterPink += 0.1
+  counterBlue += 0.3
+  counterWhite += 0.4
 
   if (amplitudeCounter == 5){
-    if (amplitudePink <= -5){
+    if (amplitudePink <= -10){
       amplitudePinkIncrease = true
-    } else if (amplitudePink >= 5){
+    } else if (amplitudePink >= 10){
       amplitudePinkIncrease = false
     }
 
-    if (amplitudeBlue <= -5){
+    if (amplitudeBlue <= -10){
       amplitudeBlueIncrease = true
-    } else if (amplitudeBlue >= 5){
+    } else if (amplitudeBlue >= 10){
       amplitudeBlueIncrease = false
     }
 
-    if (amplitudeWhite <= -5){
+    if (amplitudeWhite <= -10){
       amplitudeWhiteIncrease = true
-    } else if (amplitudeWhite >= 5){
+    } else if (amplitudeWhite >= 10){
       amplitudeWhiteIncrease = false
     }
 
@@ -172,48 +174,59 @@ function draw() {
     amplitudeCounter = 0
   }
 
-  if (counter >= width) {
-    counter = 0
-  }
-
   // console.log(counter)
   // console.log(width)
 
   for (var i = 0; i <= points; i++) {
-    var x = (i / points) * (width*2) + counter + 100
+    var x = (i / points) * (width*2) + counterPink
     var y = height/2 + amplitudePink * Math.sin((i / points) * Math.PI * frequency)
     wavePink.vertices.push(new Two.Anchor(x,y))
   }
 
   for (var i = 0; i <= points; i++) {
-    var x = -(i / points) * (width*2) + counter + 100
+    var x = -(i / points) * (width*2) + counterPink
     var y = height/2 + amplitudePink * -Math.sin((i / points) * Math.PI * frequency)
     wavePink2.vertices.push(new Two.Anchor(x,y))
   }
 
   for (var i = 0; i <= points; i++) {
-    var x = (i / points) * (width*2) + (counter*2) + 20
+    var x = (i / points) * (width*2) + (counterBlue)
     var y = height/2 + amplitudeBlue * Math.sin((i / points) * Math.PI * frequency)
     waveBlue.vertices.push(new Two.Anchor(x,y))
   }
 
   for (var i = 0; i <= points; i++) {
-    var x = -(i / points) * (width*2) + (counter*2) + 20
+    var x = -(i / points) * (width*2) + (counterBlue)
     var y = height/2 + amplitudeBlue * -Math.sin((i / points) * Math.PI * frequency)
     waveBlue2.vertices.push(new Two.Anchor(x,y))
   }
 
   for (var i = 0; i <= points; i++) {
-    var x = (i / points) * (width*2) + (counter*1.5)
+    var x = (i / points) * (width*2) + (counterWhite)
     var y = height/2 + amplitudeWhite * Math.sin((i / points) * Math.PI * frequency)
     waveWhite.vertices.push(new Two.Anchor(x,y))
   }
 
   for (var i = 0; i <= points; i++) {
-    var x = -(i / points) * (width*2) + (counter*1.5)
+    var x = -(i / points) * (width*2) + (counterWhite)
     var y = height/2 + amplitudeWhite * -Math.sin((i / points) * Math.PI * frequency)
     waveWhite2.vertices.push(new Two.Anchor(x,y))
   }
+
+  if (counterPink >= width) {
+    counterPink = 0
+  }
+
+  if (counterBlue >= width) {
+    counterBlue = 0
+  }
+
+  if (counterWhite >= width) {
+    counterWhite = 0
+  }
+
+  console.log(width)
+  console.log(counterBlue)
 
   wavePink.stroke = '#F077F8'
   wavePink.linewidth = 1.5
@@ -227,18 +240,18 @@ function draw() {
   waveBlue2.stroke = '#4BBFF5'
   waveBlue2.linewidth = 1.5
 
-  waveWhite.stroke = 'white'
+  waveWhite.stroke = 'black'
   waveWhite.linewidth = 1
 
-  waveWhite2.stroke = 'white'
+  waveWhite2.stroke = 'black'
   waveWhite2.linewidth = 1
 
-  two.add(waveWhite)
-  two.add(waveWhite2)
   two.add(wavePink)
   two.add(wavePink2)
   two.add(waveBlue)
   two.add(waveBlue2)
+  two.add(waveWhite)
+  two.add(waveWhite2)
 
   target()
 }
@@ -313,7 +326,7 @@ function mouseMoved(event) {
   if (timelineDrag) {
     let tempX = leftX + mouseX - prevX
     leftX = (!bce && tempX < 0 && currentYear < leftYear + numTick * tickYears[tickYearIdx]) ? 0 : tempX
-    counter += tempX
+    counter += Math.abs(tempX)
     prevX = mouseX
   }
 }
