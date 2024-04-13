@@ -25,12 +25,6 @@ export function updateYear() {
   targetYear.innerHTML = fontColor(globalThis.targetYear, "black") + fontColor("|", "grey") + fontColor(globalThis.targetBCE, "black")
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  document.addEventListener('mousedown', mousePressed)
-  document.addEventListener('mouseup', mouseReleased)
-  document.addEventListener('mousemove', mouseMoved)
-})
-
 let drag = false
 let mouseX = 0, mouseY = 0
 let prevX = 0, prevY = 0
@@ -52,26 +46,24 @@ function resizeTargetYear(_) {
   })
 }
 
-export { withinTargetYearBounds, resizeTargetYear }
-
-function mousePressed(event) {
+function targetYearMD(event) {
   event.preventDefault()
   mouseX = event.clientX
   mouseY = event.clientY
-  if (withinTargetYearBounds(mouseX, mouseY)) {
-    prevX = mouseX
-    prevY = mouseY
-    drag = true
-  }
+  prevX = mouseX
+  prevY = mouseY
+  drag = true
 }
 
-function mouseReleased(event) {
+function targetYearMU(event) {
+  event.preventDefault()
   mouseX = event.clientX
   mouseY = event.clientY
   drag = false
 }
 
-function mouseMoved(event) {
+function targetYearMM(event) {
+  event.preventDefault()
   mouseX = event.clientX
   mouseY = event.clientY
   if (drag) {
@@ -95,3 +87,5 @@ function mouseMoved(event) {
     })
   }
 }
+
+export { withinTargetYearBounds, resizeTargetYear, targetYearMD, targetYearMU, targetYearMM }

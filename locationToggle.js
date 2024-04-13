@@ -16,12 +16,6 @@ globalThis.addPin = false
 const locationToggle = document.querySelector('#location')
 const two = new Two({width: width, height: height}).appendTo(locationToggle)
 
-document.addEventListener('DOMContentLoaded', () => {
-  document.addEventListener('mousedown', mousePressed)
-  document.addEventListener('mouseup', mouseReleased)
-  document.addEventListener('mousemove', mouseMoved)
-})
-
 function resetLocationPin() {
   visible = true
   
@@ -49,7 +43,7 @@ function resetLocationPin() {
 resetLocationPin()
 
 function withinLocationPinBounds(x, y) {
-  return x > divX && x < divX + width && y > divY && y < divY + height
+  return (x > divX && x < divX + width && y > divY && y < divY + height) && visible
 }
 
 function resizeLocationPin(_) {
@@ -68,27 +62,23 @@ function resizeLocationPin(_) {
   }
 }
 
-export { withinLocationPinBounds, resizeLocationPin, resetLocationPin }
-
 let drag = false
 let mouseX = 0, mouseY = 0
 let prevX = 0, prevY = 0
 
-function mousePressed(event) {
+function locationToggleMD(event) {
   event.preventDefault()
   mouseX = event.clientX
   mouseY = event.clientY
-  if (withinLocationPinBounds(mouseX, mouseY) && visible) {
-    prevX = mouseX
-    prevY = mouseY
-    drag = true
-  }
+  prevX = mouseX
+  prevY = mouseY
+  drag = true
 }
 
-function mouseReleased(event) {
+function locationToggleMU(event) {
+  event.preventDefault()
   mouseX = event.clientX
   mouseY = event.clientY
-
   if (drag) {
     if (inGlobe()) {
       visible = false
@@ -107,7 +97,8 @@ function mouseReleased(event) {
   drag = false
 }
 
-function mouseMoved(event) {
+function locationToggleMM(event) {
+  event.preventDefault()
   mouseX = event.clientX
   mouseY = event.clientY
   if (drag) {
@@ -131,3 +122,5 @@ function mouseMoved(event) {
     })
   }
 }
+
+export { withinLocationPinBounds, resizeLocationPin, resetLocationPin, locationToggleMD, locationToggleMU, locationToggleMM }
