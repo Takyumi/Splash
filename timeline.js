@@ -1,7 +1,5 @@
 import './tailwind.css'
-import { updateYear, withinTargetYearBounds } from "./targetYear.js"
-import { withinPinWindowBounds } from "./pinWindow.js"
-import { withinLocationPinBounds } from "./locationToggle.js";
+import { updateYear } from "./targetYear.js"
 import Two from 'https://cdn.skypack.dev/two.js@latest'
 
 const timelineContainer = document.querySelector('#timelineContainer')
@@ -21,7 +19,7 @@ let minSpcBtwns = [30, 30, 30, 30, width/5]
 let maxSpcBtwns = [width/4, 300, 300, 300, width/2]
 
 let prevX = 0, mouseX = 0, mouseY = 0
-let leftX = 0, leftYear = 0
+let leftX = 0, leftYear = 2021
 let bce = false
 
 let timelineDrag = false, targetDrag = false
@@ -64,10 +62,6 @@ document.addEventListener('DOMContentLoaded', () => {
   two.bind('update', draw)
   
   two.play()
-
-  document.addEventListener('mousedown', mousePressed)
-  document.addEventListener('mouseup', mouseReleased)
-  document.addEventListener('mousemove', mouseMoved)
 
 })
 
@@ -225,8 +219,8 @@ function draw() {
     counterWhite = 0
   }
 
-  console.log(width)
-  console.log(counterBlue)
+  // console.log(width)
+  // console.log(counterBlue)
 
   wavePink.stroke = '#F077F8'
   wavePink.linewidth = 1.5
@@ -275,22 +269,20 @@ function drawTick(x, ticksDrawn) {
   }
 }
 
-function mousePressed(event) {
+function withinTimelineBounds(y) {
+  return y > window.innerHeight - height
+}
+
+function timelineMD(event) {
+  event.preventDefault()
   mouseX = event.clientX
   mouseY = event.clientY
-  if (withinTargetYearBounds(mouseX, mouseY)
-    || withinLocationPinBounds(mouseX, mouseY)
-    || withinPinWindowBounds(mouseX, mouseY)) {
-    return
-  }
   mouseY -= frameY
-  if (event.clientY > window.innerHeight - height) {
-    prevX = mouseX
-    if (inTarget(mouseX, mouseY)) {
-      targetDrag = true
-    } else {
-      timelineDrag = true
-    }
+  prevX = mouseX
+  if (inTarget(mouseX, mouseY)) {
+    targetDrag = true
+  } else {
+    timelineDrag = true
   }
 }
 
@@ -313,20 +305,24 @@ function inTarget(x, y) {
   return inTargetCircle || inTopTriangle || inBottomTriangle
 }
 
-function mouseReleased(event) {
+function timelineMU(event) {
+  event.preventDefault()
   mouseX = event.clientX
   mouseY = event.clientY - frameY
   timelineDrag = false
   targetDrag = false
 }
 
-function mouseMoved(event) {
+function timelineMM(event) {
+  event.preventDefault()
   mouseX = event.clientX
   mouseY = event.clientY - frameY
   if (timelineDrag) {
     let tempX = leftX + mouseX - prevX
     leftX = (!bce && tempX < 0 && currentYear < leftYear + numTick * tickYears[tickYearIdx]) ? 0 : tempX
-    counter += Math.abs(tempX)
+    counterPink += Math.abs(tempX)
+    counterBlue += Math.abs(tempX)
+    counterWhite += Math.abs(tempX)
     prevX = mouseX
   }
 }
@@ -420,3 +416,4 @@ function target() {
   two.makeText(Math.abs(targetYear) + (targetBCE ? " BCE" : " CE"), targetPosition, height/2 + 50)
 }
 
+export { withinTimelineBounds, timelineMD, timelineMU, timelineMM }
