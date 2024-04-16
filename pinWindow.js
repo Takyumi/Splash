@@ -8,6 +8,7 @@ let two
 
 let divXs = [], divYs = []
 const width = 425, height = 325
+const textPadding = '50px'
 
 let newId = 0
 let pinWindowDivs = new Map()
@@ -36,12 +37,13 @@ export function createPinWindowDiv() {
   pinWindowDiv.classList.add('shadow-lg')
 
   pinWindowDiv.style.width = width + "px"
-  pinWindowDiv.style.lineHeight = height + "px"
+  pinWindowDiv.style.maxHeight = height + "px"
   pinWindowDiv.style.fontFamily = "arial"
   pinWindowDiv.style.visibility = "visible"
   pinWindowDiv.style.paddingLeft = "20px"
   pinWindowDiv.style.backgroundColor = 'white'
   pinWindowDiv.style.overflow = 'visible'
+  //pinWindowDiv.position = 'relative'
   
   //pinWindowDiv.style.border = "0.2px solid rgb(71,71,71)"
 
@@ -50,14 +52,14 @@ export function createPinWindowDiv() {
   eventInput.id = 'eventInput'
   eventInput.placeholder = 'Event Title'
   eventInput.style.position = 'absolute'
-  eventInput.style.left = '50px'
-  eventInput.style.top = '10px'
+  eventInput.style.left = textPadding
+  eventInput.style.top = '15px'
   eventInput.style.fontSize = '24px'
-  eventInput.style.width = '270px'
   eventInput.style.maxHeight = '45px'
   eventInput.style.letterSpacing = '0px'
   eventInput.style.fontWeight = 'bold'
   eventInput.style.fontFamily = 'Arial'
+  eventInput.style.width = '270px'
   //eventInput.style.outline = 'none'
 
   pinWindowDiv.appendChild(eventInput)
@@ -69,7 +71,8 @@ export function createPinWindowDiv() {
   headerInput.style.position = 'absolute'
   headerInput.style.top = '100px'
   headerInput.style.fontSize = '18px'
-  headerInput.style.width = '370px'
+  headerInput.style.left = textPadding
+  headerInput.style.width = '350px'
   headerInput.style.height = '25px'
   headerInput.style.fontFamily = 'Arial'
   headerInput.style.letterSpacing = '0px'
@@ -84,8 +87,9 @@ export function createPinWindowDiv() {
   descriptionInput.placeholder = 'Enter Description'
   descriptionInput.style.position = 'absolute'
   descriptionInput.style.top = '120px'
+  descriptionInput.style.left = textPadding
   descriptionInput.style.fontSize = '12px'
-  descriptionInput.style.width = '370px'
+  descriptionInput.style.width = '350px'
   descriptionInput.style.height = '50px'
   //descriptionInput.style.outline = 'none'
   descriptionInput.style.fontFamily = 'Arial'
@@ -94,27 +98,66 @@ export function createPinWindowDiv() {
 
   pinWindowDiv.appendChild(descriptionInput)
 
+  const inputYear = document.createElement('text')
+  inputYear.id = 'inputYear'
+  inputYear.textContent = `${globalThis.targetYear} ${globalThis.targetBCE}`
+  inputYear.style.position = 'absolute'
+  inputYear.style.top = '0px'
+  inputYear.style.right = '15px'
+
+  pinWindowDiv.appendChild(inputYear)
+
+  const location = document.createElement('text')
+  location.id = 'location'
+  location.textContent = `Lat: ${globalThis.pinLatitude}  Lng: ${globalThis.pinLongitude}`
+  location.style.position = 'absolute'
+  location.style.bottom = '60px'
+  location.style.left = '10px'
+  pinWindowDiv.appendChild(location)
+
   const publishButton = document.createElement('button')
-  publishButton.id = 'mybutton'
+  publishButton.id = 'publishButton'
   publishButton.textContent = 'Publish'
-  //publishButton.style.position = 'relative'
-  publishButton.style.padding = '10px 10px'
-  // publishButton.style.top = (height - 155) + 'px'
-  // publishButton.style.width = '100px'
-  // publishButton.style.maxHeight = '30px'
-  publishButton.style.fontSize = '5px'
-  publishButton.style.color = 'black'
+  publishButton.style.position = 'absolute'
+  publishButton.style.bottom = '15px'
+  publishButton.style.right = '20px'
+  publishButton.style.width = '100px'
+  publishButton.style.height = '40px'
+  publishButton.style.fontSize = '16px'
+  publishButton.style.fontWeight = 'bold'
+  publishButton.style.color = 'white'
   publishButton.style.backgroundColor = '#7ED4E7'
-  publishButton.style.border = 'none'
-  publishButton.style.borderRadius = '5px'
+  publishButton.style.borderRadius = '12px'
   publishButton.style.cursor = 'pointer'
-  publishButton.style.outline = 'none'
-  console.log((height - 25) + 'px')
+  publishButton.style.boxSizing = 'border-box'
 
   pinWindowDiv.appendChild(publishButton)
 
   publishButton.addEventListener('click', function(){
-    console.log('button was clicked')
+    console.log('published was clicked')
+  })
+
+  const saveButton = document.createElement('button')
+  saveButton.id = 'saveButton'
+  saveButton.textContent = 'Save'
+  saveButton.style.position = 'absolute'
+  saveButton.style.bottom = '15px'
+  saveButton.style.right = '130px'
+  saveButton.style.width = '70px'
+  saveButton.style.height = '40px'
+  saveButton.style.fontSize = '16px'
+  //saveButton.style.fontWeight = 'bold'
+  saveButton.style.color = 'black'
+  saveButton.style.backgroundColor = 'white'
+  saveButton.style.border = '1.5px solid darkgray'
+  saveButton.style.borderRadius = '12px'
+  saveButton.style.cursor = 'pointer'
+  saveButton.style.boxSizing = 'border-box'
+
+  pinWindowDiv.appendChild(saveButton)
+
+  saveButton.addEventListener('click', function(){
+    console.log('save was clicked')
   })
 
   let square = two.makeRectangle(8,32,12,12)

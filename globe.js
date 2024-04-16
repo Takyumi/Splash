@@ -110,7 +110,7 @@ function createBoxes(countries) {
     //23.6345° N, 102.5528° W = mexico
     //West = negative, East = Positive
     const latitude = (lat / 180) * Math.PI //converts degrees to radian since js sin/cos/tan can only take in radians
-    const longitude = (lng / 180) * Math.PI
+    const longitude = (lng / 180) * Math.PI + Math.PI / 2
     const radius = 5
 
     const x = radius * Math.cos(latitude) * Math.sin(longitude)
@@ -123,7 +123,6 @@ function createBoxes(countries) {
 
     box.lookAt(0, 0, 0)
     box.geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(0, 0, -zScale/2))
-
 
     group.add(box)
 
@@ -222,7 +221,8 @@ function getMouseSpherePos(intersects) {
   const y = radius * Math.sin(latitude)
   const z = radius * Math.cos(latitude) * Math.cos(longitude)
 
-  // console.log(pos.position, x, y, z)
+  globalThis.pinLatitude = 180 * latitude / Math.PI
+  globalThis.pinLongitude = 180 * (longitude - Math.PI / 2) / Math.PI
   
   return new THREE.Vector3(x, y, z)
 }
@@ -275,9 +275,7 @@ addEventListener('mousemove', (event) => {
     })
     mouse.xPrev = event.clientX
     mouse.yPrev = event.clientY
-
   }
-
 })
 
 let pinWindowId = undefined
