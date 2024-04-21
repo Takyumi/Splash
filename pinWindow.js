@@ -110,7 +110,7 @@ export function createPinWindowDiv() {
 
   const headerInput = document.createElement('input')
   headerInput.type = 'text'
-  headerInput.id = 'eventInput'
+  headerInput.id = 'headerInput'
   headerInput.placeholder = 'Enter Header'
   headerInput.style.position = 'absolute'
   headerInput.style.top = '100px'
@@ -128,7 +128,7 @@ export function createPinWindowDiv() {
 
   const descriptionInput = document.createElement('input')
   descriptionInput.type = 'text'
-  descriptionInput.id = 'eventInput'
+  descriptionInput.id = 'descriptionInput'
   descriptionInput.placeholder = 'Enter Description'
   descriptionInput.style.position = 'absolute'
   descriptionInput.style.top = '120px'
@@ -204,27 +204,59 @@ export function createPinWindowDiv() {
   pinWindowDiv.appendChild(publishButton)
 
   publishButton.addEventListener('click', function(){
-    console.log('published was clicked')
-  })
+    const eventData = document.getElementById('eventInput').value;
+    if (!eventData) {
+      console.error('Event title is required')
+      return
+    }
 
-  const saveButton = document.createElement('button')
-  saveButton.id = 'saveButton'
-  saveButton.textContent = 'Save'
-  saveButton.style.position = 'absolute'
-  saveButton.style.bottom = bottomPadding
-  saveButton.style.right = '130px'
-  saveButton.style.width = '70px'
-  saveButton.style.height = '40px'
-  saveButton.style.fontSize = '16px'
-  //saveButton.style.fontWeight = 'bold'
-  saveButton.style.color = 'black'
-  saveButton.style.backgroundColor = 'white'
-  saveButton.style.border = '1.5px solid darkgray'
-  saveButton.style.borderRadius = '12px'
-  saveButton.style.cursor = 'pointer'
-  saveButton.style.boxSizing = 'border-box'
+    const data = {
+      eventTitle: eventData,
+      header: document.getElementById('headerInput').value,
+      description: document.getElementById('descriptionInput').value,
+      year: inputYear.textContent,
+      lat: locationLat.textContent,
+      lng: locationLng.textContent,
+    };
 
-  pinWindowDiv.appendChild(saveButton)
+    const xhr = new XMLHttpRequest();
+
+    xhr.open('POST', 'http://localhost:3000/writeFile');
+    xhr.setRequestHeader('Content-Type', 'application/json');
+
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        console.log('Data has been written to file successfully.');
+      } else {
+        console.error('Error writing to file:', xhr.statusText);
+      }
+    };
+
+    xhr.onerror = function() {
+      console.error('Network error occurred.');
+    };
+
+    xhr.send(JSON.stringify(data));
+  });
+
+  // const saveButton = document.createElement('button')
+  // saveButton.id = 'saveButton'
+  // saveButton.textContent = 'Save'
+  // saveButton.style.position = 'absolute'
+  // saveButton.style.bottom = bottomPadding
+  // saveButton.style.right = '130px'
+  // saveButton.style.width = '70px'
+  // saveButton.style.height = '40px'
+  // saveButton.style.fontSize = '16px'
+  // //saveButton.style.fontWeight = 'bold'
+  // saveButton.style.color = 'black'
+  // saveButton.style.backgroundColor = 'white'
+  // saveButton.style.border = '1.5px solid darkgray'
+  // saveButton.style.borderRadius = '12px'
+  // saveButton.style.cursor = 'pointer'
+  // saveButton.style.boxSizing = 'border-box'
+
+  // pinWindowDiv.appendChild(saveButton)
 
   const addButton = document.createElement('button')
   addButton.id = 'addButton'
@@ -246,9 +278,9 @@ export function createPinWindowDiv() {
   addButton.appendChild(addImage)
   pinWindowDiv.appendChild(addButton)
 
-  saveButton.addEventListener('click', function(){
-    console.log('save was clicked')
-  })
+  // saveButton.addEventListener('click', function(){
+  //   console.log('save was clicked')
+  // })
   
   addButton.addEventListener('click', function(){
     console.log('yay!')

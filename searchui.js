@@ -9,6 +9,7 @@ const searchui = document.querySelector('#search')
 let divX, divY
 let width, height
 var searchClick = false
+let addSearchDiv = false
 
 divX = 15; divY = 15;
 width = 480; height = 35;
@@ -52,16 +53,50 @@ textInput.addEventListener('input', function(event) {
   //console.log(event.target.value)
 })
 
-// textInput.addEventListener('click', function(_) {
-//   searchClick = true
-//   //console.log(searchClick)
-// })
-
-searchui.addEventListener('click', function(event) {
-  if (event.target !== textInput) {
+document.addEventListener('click', function(event) {
+  if (event.target === searchui
+   || event.target === searchImg) {
+    searchClick = true;
+    addSearchDiv = true
     textInput.focus();
+  } else if (event.target === textInput) {
+    searchClick = true;
+    addSearchDiv = true
+  } else {
+    searchClick = false;
+    addSearchDiv = false
   }
 });
+
+const draw = () => {
+  if (!searchClick) {
+    two.clear()
+  }
+  if (addSearchDiv) {
+    console.log('search is active')
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', 'http://localhost:3000/readFile');
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === XMLHttpRequest.DONE) {
+        if (xhr.status === 200) {
+          const textData = xhr.responseText;
+          console.log('textData', textData)
+          // Create text using the fetched data
+          let text = two.makeText(textData);
+          text.fill = 'white';
+          text.family = 'Spline Sans Mono,sans-serif';
+          // Position the text as needed
+          text.translation.set(50, 20);
+          // Add more styling or positioning as needed
+        } else {
+          console.error('Failed to fetch text data:', xhr.status);
+        }
+      }
+    };
+    xhr.send();
+    addSearchDiv = false
+  }
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   two = new Two({
@@ -70,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
     height: height
   }).appendTo(searchui)
 
-  // two.bind('update', draw)
+  two.bind('update', draw)
   two.play()
 
   //document.addEventListener('mousedown', mousePressed)
@@ -87,8 +122,3 @@ gsap.set(searchui, {
   x: divX,
   y: divY
 })
-
-// function draw() {
-//   two.clear()
-  
-// }
