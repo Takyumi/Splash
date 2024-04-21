@@ -3,26 +3,30 @@ import gsap from 'gsap'
 
 const targetYear = document.querySelector('#year')
 
-let divX = 50, divY = 490
 const width = 200, height = 92
+let divX = 50, divY = 4*window.innerHeight/5 - (height+20)
 
 gsap.set(targetYear, {
   x: divX,
   y: divY
 })
-targetYear.style.width = width + "px"
-targetYear.style.lineHeight = height + "px"
-targetYear.style.textAlign = "center"
-targetYear.style.verticalAlign = "middle"
-targetYear.style.fontSize = "36px"
-targetYear.style.fontFamily = "Spline Sans Mono,sans-serif"
+targetYear.style.width = width + 'px'
+targetYear.style.lineHeight = height + 'px'
+targetYear.style.textAlign = 'center'
+targetYear.style.verticalAlign = 'middle'
+targetYear.style.fontSize = '36px'
+targetYear.style.fontFamily = 'Spline Sans Mono,sans-serif'
+targetYear.style.backgroundColor = 'transparent'
+targetYear.style.cursor = 'pointer'
+targetYear.style.outline = '1.5px solid white'
+targetYear.style.borderRadius = '25px'
 
 function fontColor(str, color) {
   return '<span style="color: ' + color + '">' + str + '</span>'
 }
 
 export function updateYear() {
-  targetYear.innerHTML = fontColor(globalThis.targetYear, "black") + fontColor("|", "grey") + fontColor(globalThis.targetBCE, "black")
+  targetYear.innerHTML = fontColor(globalThis.targetYear, "white") + fontColor("|", "grey") + fontColor(globalThis.targetBCE, "white")
 }
 
 let drag = false

@@ -23,7 +23,7 @@ function zoom(event) {
 }
 
 const scene = new THREE.Scene()
-scene.background = new THREE.Color( 0xeeeee4 )
+scene.background = new THREE.Color( 0x111516 ) //Hexadecimal 0xeeeee4
 let camera = new THREE.PerspectiveCamera(75,globeContainer.offsetWidth / globeContainer.offsetHeight, 0.1, 1000)
 const renderer = new THREE.WebGLRenderer(
   {
@@ -42,7 +42,8 @@ const sphere = new THREE.Mesh(
     fragmentShader,
     uniforms: {
         globeTexture: {
-          value: new THREE.TextureLoader().load('./image/globe-highRes-white.png')
+          //value: new THREE.TextureLoader().load('./image/globe-highRes-white.png')
+          value: new THREE.TextureLoader().load('./image/globe.jpg')
       }
     }
   })
@@ -101,7 +102,7 @@ function createBoxes(countries) {
         Math.max(0.1, 0.2 * scale), 
         Math.max(zScale, 0.4 * Math.random())),
       new THREE.MeshBasicMaterial({
-        color: '#FF9EFD',
+        color: 'rgb(43, 227, 255)', //pink: #FF9EFD
         opacity: 0.4,
         transparent: true
       })

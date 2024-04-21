@@ -11,7 +11,7 @@ let width, height
 var searchClick = false
 
 divX = 15; divY = 15;
-width = 380; height = 35;
+width = 480; height = 35;
 
 searchui.style.width = width + "px"
 searchui.style.lineHeight = height + "px"
@@ -19,7 +19,8 @@ searchui.style.textAlign = "center"
 searchui.style.verticalAlign = "middle"
 searchui.style.fontSize = "36px"
 searchui.style.fontFamily = "Arial"
-
+searchui.style.backgroundColor = 'transparent'
+searchui.style.outline = '1.2px solid white'
 
 const searchImg = document.createElement('img')
 searchImg.src = './image/searchIcon.png'
@@ -42,6 +43,8 @@ textInput.style.width = '300px'
 textInput.style.height = '25px'
 textInput.style.outline = 'none'
 textInput.style.fontFamily = ''
+textInput.style.backgroundColor = 'transparent'
+textInput.style.color = 'white'
 
 searchui.appendChild(textInput)
 

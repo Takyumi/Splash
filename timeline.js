@@ -12,11 +12,14 @@ let frameY = window.innerHeight - height
 
 let currentDate = new Date(), currentYear = currentDate.getFullYear()
 
-const tickSize = 5, tickWidth = 1.7
+const tickSize = 2, tickWidth = 1.7
 let spcBtwn = 50, numTick = width / spcBtwn
 let tickYears = [1, 10, 100, 1000, 1000000], tickYearIdx = 0
-let minSpcBtwns = [30, 30, 30, 30, width/5]
+let minSpcBtwns = [40, 40, 40, 40, width/5]
 let maxSpcBtwns = [width/4, 300, 300, 300, width/2]
+let targetMinHeight = 18, targetMaxHeight = 27, targetWidth = 10
+let targetColor = '#781416'
+let targetColorClicked = 'red'
 
 let prevX = 0, mouseX = 0, mouseY = 0
 let leftX = 0, leftYear = 2021
@@ -24,7 +27,7 @@ let bce = false
 
 let timelineDrag = false, targetDrag = false
 let targetPosition = 100
-const targetSize = 5
+const targetSize = 20
 
 globalThis.yearString = Math.floor(leftYear + (targetPosition/spcBtwn)) + (bce ? " BCE" : " CE")
 
@@ -55,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     height: height
   }).appendTo(timelineContainer)
 
-  two.renderer.domElement.style.background = 'rgb(238,238,228)'
+  two.renderer.domElement.style.background = '#111516'
 
   resize()
 
@@ -222,22 +225,22 @@ function draw() {
   // console.log(width)
   // console.log(counterBlue)
 
-  wavePink.stroke = '#F077F8'
-  wavePink.linewidth = 1.5
+  wavePink.stroke = '#755a09'
+  wavePink.linewidth = 1
 
-  wavePink2.stroke = '#F077F8'
-  wavePink2.linewidth = 1.5
+  wavePink2.stroke = '#755a09'
+  wavePink2.linewidth = 1
 
-  waveBlue.stroke = '#4BBFF5'
-  waveBlue.linewidth = 1.5
+  waveBlue.stroke = '#edb92b'
+  waveBlue.linewidth = 1
 
-  waveBlue2.stroke = '#4BBFF5'
-  waveBlue2.linewidth = 1.5
+  waveBlue2.stroke = '#edb92b'
+  waveBlue2.linewidth = 1
 
-  waveWhite.stroke = 'black'
+  waveWhite.stroke = '#fadf43'
   waveWhite.linewidth = 1
 
-  waveWhite2.stroke = 'black'
+  waveWhite2.stroke = '#fadf43'
   waveWhite2.linewidth = 1
 
   two.add(wavePink)
@@ -261,11 +264,13 @@ function drawTick(x, ticksDrawn) {
   }
 
   if (tickYear <= currentYear) {
-    let tick = two.makeLine(x, (height/2 - 20) + tickSize, x, (height/2 - 20) - tickSize)
-    tick.stroke = 'black'
+    let tick = two.makeLine(x, (height/2 - 25) + tickSize, x, (height/2 - 25) - tickSize)
+    tick.stroke = 'transparent'
     tick.linewidth = tickWidth
 
-    two.makeText(Math.abs(tickYear), x, height/2 - 37)
+    let text = two.makeText(Math.abs(tickYear), x, height/2 - 40)
+    text.fill = 'white'
+    text.family = 'Spline Sans Mono,sans-serif'
   }
 }
 
@@ -300,8 +305,8 @@ function inTriangle(x, y, x1, y1, x2, y2, x3, y3) {
 
 function inTarget(x, y) {
   let inTargetCircle = (x - targetPosition)**2 + (y - height/2)**2 < targetSize**2
-  let inTopTriangle = inTriangle(x, y, targetPosition, height/2 - 15, targetPosition - 8, height/2 - 25, targetPosition + 8, height/2 - 25)
-  let inBottomTriangle = inTriangle(x, y, targetPosition, height/2 + 15, targetPosition - 8, height/2 + 25, targetPosition + 8, height/2 + 25)
+  let inTopTriangle = inTriangle(x, y, targetPosition, height/2 - targetMinHeight, targetPosition - targetWidth, height/2 - targetMaxHeight, targetPosition + targetWidth, height/2 - targetMaxHeight)
+  let inBottomTriangle = inTriangle(x, y, targetPosition, height/2 + targetMinHeight, targetPosition - targetWidth, height/2 + targetMaxHeight, targetPosition + targetWidth, height/2 + targetMaxHeight)
   return inTargetCircle || inTopTriangle || inBottomTriangle
 }
 
@@ -374,32 +379,44 @@ function zoom(event) {
 }
 
 function target() {
-  // let target = two.makeCircle(targetPosition, height/2, targetSize)
-  // target.stroke = 'red'
 
   const bottomVertices = [
-    new Two.Vector(targetPosition, height/2 + 15),
-    new Two.Vector(targetPosition - 8, height/2 + 25),
-    new Two.Vector(targetPosition + 8, height/2 + 25)
+    new Two.Vector(targetPosition, height/2 + targetMinHeight),
+    new Two.Vector(targetPosition - targetWidth, height/2 + targetMaxHeight),
+    new Two.Vector(targetPosition + targetWidth, height/2 + targetMaxHeight)
   ]
 
   const topVertices = [
-    new Two.Vector(targetPosition, height/2 - 15),
-    new Two.Vector(targetPosition - 8, height/2 - 25),
-    new Two.Vector(targetPosition + 8, height/2 - 25)
+    new Two.Vector(targetPosition, height/2 - targetMinHeight),
+    new Two.Vector(targetPosition - targetWidth, height/2 - targetMaxHeight),
+    new Two.Vector(targetPosition + targetWidth, height/2 - targetMaxHeight)
   ]
 
-  let targetBottom = two.makePath(bottomVertices, true)
-  targetBottom.fill = 'red'
-  targetBottom.linewidth = 0
+  let targetBottom = two.makePath(bottomVertices, true, false)
+  targetBottom.fill = 'transparent'
+  targetBottom.stroke = 'transparent'
+  targetBottom.linewidth = 1
 
-  let targetTop = two.makePath(topVertices, true)
-  targetTop.fill = 'red'
-  targetTop.linewidth = 0
+  let targetTop = two.makePath(topVertices, true, false)
+  targetTop.fill = 'transparent'
+  targetTop.stroke = 'transparent'
+  targetTop.linewidth = 1
+
+  let targetCenter = two.makeRectangle(targetPosition, height/2, 25, 25)
+  targetCenter.fill = '#B0A3FF'
+  targetCenter.stroke = '#11151680'
+  targetCenter.linewidth = 4
+  targetCenter.rotation = Math.PI/4
+
+  // let targetCircle = two.makeCircle(targetPosition, height/2, targetSize)
+  // targetCircle.stroke = 'white'
+  // targetCircle.fill = 'transparent'
 
   if (targetDrag) {  
     targetPosition = mouseX
-    target.fill = 'red'
+    targetTop.fill = targetColorClicked
+    targetBottom.fill = targetColorClicked
+    //targetCircle.linewidth = '2px'
   }
   
   let yearDiff = Math.floor((targetPosition - leftX) * tickYears[tickYearIdx] / spcBtwn)
@@ -413,7 +430,7 @@ function target() {
   globalThis.targetYear = Math.abs(targetYear)
   globalThis.targetBCE = targetBCE ? "BCE" : "CE"
   updateYear()
-  two.makeText(Math.abs(targetYear) + (targetBCE ? " BCE" : " CE"), targetPosition, height/2 + 50)
+  //two.makeText(Math.abs(targetYear) + (targetBCE ? " BCE" : " CE"), targetPosition, height/2 + 50)
 }
 
 export { withinTimelineBounds, timelineMD, timelineMU, timelineMM }
