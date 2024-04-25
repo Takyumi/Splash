@@ -3,8 +3,9 @@ import gsap from 'gsap'
 
 const targetYear = document.querySelector('#year')
 
+let windowWidth = window.innerWidth, windowHeight = window.innerHeight
 const width = 200, height = 92
-let divX = 50, divY = 4*window.innerHeight/5 - (height+20)
+let divX = windowWidth - 250, divY = windowHeight/2 + height/2
 
 gsap.set(targetYear, {
   x: divX,

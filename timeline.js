@@ -22,11 +22,12 @@ let targetColor = '#781416'
 let targetColorClicked = 'red'
 
 let prevX = 0, mouseX = 0, mouseY = 0
-let leftX = 0, leftYear = 2021
+let leftX = 0, leftYear = currentYear - (width/spcBtwn) + 1
 let bce = false
 
 let timelineDrag = false, targetDrag = false
 let targetPosition = 100
+let targetDotSize = undefined
 const targetSize = 20
 
 globalThis.yearString = Math.floor(leftYear + (targetPosition/spcBtwn)) + (bce ? " BCE" : " CE")
@@ -225,22 +226,22 @@ function draw() {
   // console.log(width)
   // console.log(counterBlue)
 
-  wavePink.stroke = '#755a09'
+  wavePink.stroke = '#30e3e0'
   wavePink.linewidth = 1
 
-  wavePink2.stroke = '#755a09'
+  wavePink2.stroke = '#30e3e0'
   wavePink2.linewidth = 1
 
-  waveBlue.stroke = '#edb92b'
+  waveBlue.stroke = '#3098e3'
   waveBlue.linewidth = 1
 
-  waveBlue2.stroke = '#edb92b'
+  waveBlue2.stroke = '#3098e3'
   waveBlue2.linewidth = 1
 
-  waveWhite.stroke = '#fadf43'
+  waveWhite.stroke = '#51d115'
   waveWhite.linewidth = 1
 
-  waveWhite2.stroke = '#fadf43'
+  waveWhite2.stroke = '#51d115'
   waveWhite2.linewidth = 1
 
   two.add(wavePink)
@@ -379,7 +380,6 @@ function zoom(event) {
 }
 
 function target() {
-
   const bottomVertices = [
     new Two.Vector(targetPosition, height/2 + targetMinHeight),
     new Two.Vector(targetPosition - targetWidth, height/2 + targetMaxHeight),
@@ -392,21 +392,26 @@ function target() {
     new Two.Vector(targetPosition + targetWidth, height/2 - targetMaxHeight)
   ]
 
-  let targetBottom = two.makePath(bottomVertices, true, false)
-  targetBottom.fill = 'transparent'
-  targetBottom.stroke = 'transparent'
-  targetBottom.linewidth = 1
+  // let targetBottom = two.makePath(bottomVertices, true, false)
+  // targetBottom.fill = 'transparent'
+  // targetBottom.stroke = 'transparent'
+  // targetBottom.linewidth = 1
 
-  let targetTop = two.makePath(topVertices, true, false)
-  targetTop.fill = 'transparent'
-  targetTop.stroke = 'transparent'
-  targetTop.linewidth = 1
+  // let targetTop = two.makePath(topVertices, true, false)
+  // targetTop.fill = 'transparent'
+  // targetTop.stroke = 'transparent'
+  // targetTop.linewidth = 1
 
-  let targetCenter = two.makeRectangle(targetPosition, height/2, 25, 25)
-  targetCenter.fill = '#B0A3FF'
-  targetCenter.stroke = '#11151680'
-  targetCenter.linewidth = 4
+  let targetCenter = two.makeCircle(targetPosition, height/2, 20, 20)
+  targetCenter.fill = 'transparent'
+  targetCenter.stroke = '#fcf8d4'
+  targetCenter.linewidth = 1.5
   targetCenter.rotation = Math.PI/4
+
+  let targetDot = two.makeCircle(targetPosition, height/2, targetDotSize, targetDotSize)
+  targetDot.fill = '#fcf8d480'
+  targetDot.stroke = 'transparent'
+  targetDotSize = 0
 
   // let targetCircle = two.makeCircle(targetPosition, height/2, targetSize)
   // targetCircle.stroke = 'white'
@@ -414,11 +419,14 @@ function target() {
 
   if (targetDrag) {  
     targetPosition = mouseX
-    targetTop.fill = targetColorClicked
-    targetBottom.fill = targetColorClicked
-    //targetCircle.linewidth = '2px'
+    targetDotSize = 15
   }
-  
+
+  if (targetPosition > width) {
+    targetPosition = width
+  } else if (targetPosition < 0) {
+    targetPosition = 0
+  }
   let yearDiff = Math.floor((targetPosition - leftX) * tickYears[tickYearIdx] / spcBtwn)
   let targetYear = leftYear + yearDiff
   if (targetYear == 0) {

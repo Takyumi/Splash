@@ -1,18 +1,19 @@
 import './tailwind.css'
 import gsap from 'gsap'
 import Two from 'https://cdn.skypack.dev/two.js@latest'
-import { add } from 'three/examples/jsm/libs/tween.module.js'
+import { deletePin } from './globe'
 
 // TODO(gxin): drag doesn't work for second added pin window
 
 let two
 
+let windowWidth = window.innerWidth, windowHeight = window.innerHeight
 let divXs = [], divYs = []
-const width = 425, height = 325
+const width = 425, height = 2*windowHeight/3
 const textPadding = '50px'
-const bottomPadding = '15px'
+const bottomPadding = '30px'
 
-let moveClick = false
+let moveClick = false, heightClick = false
 let newId = 0
 let pinWindowDivs = new Map()
 
@@ -20,44 +21,40 @@ export function createPinWindowDiv() {
   let pinWindowDiv = document.createElement('div')
   pinWindowDiv.setAttribute('id', 'pinDiv' + newId)
 
-  divXs.push(15)
-  divYs.push(70)
-
-  gsap.set(pinWindowDiv, {
-    x: divXs[newId],
-    y: divYs[newId]
-  })
-
   let two = new Two({
     type: Two.Types.svg,
     width: width,
     height: height
   }).appendTo(pinWindowDiv);
 
+  divXs.push(15)
+  divYs.push(100)
+
+  gsap.set(pinWindowDiv, {
+    x: divXs[newId],
+    y: divYs[newId]
+  })
+
   pinWindowDiv.classList.add('fixed')
-  pinWindowDiv.classList.add('bg-white')
   pinWindowDiv.classList.add('rounded-xl')
-  pinWindowDiv.classList.add('shadow-lg')
+  //pinWindowDiv.classList.add('shadow-lg')
 
   pinWindowDiv.style.width = width + "px"
   pinWindowDiv.style.maxHeight = height + "px"
   pinWindowDiv.style.fontFamily = "arial"
   pinWindowDiv.style.visibility = "visible"
-  // pinWindowDiv.style.paddingLeft = "20px"
-  pinWindowDiv.style.backgroundColor = 'white'
+  pinWindowDiv.style.backgroundColor = 'rgb(0,0,0,0.8)'
   pinWindowDiv.style.overflow = 'hidden'
-  //pinWindowDiv.position = 'relative'
+  pinWindowDiv.style.border = '1px solid white'
   
-  //pinWindowDiv.style.border = "0.2px solid rgb(71,71,71)"
-
   const windowMove = document.createElement('button')
   windowMove.id = 'windowMove'
   windowMove.style.position = 'absolute'
   windowMove.style.top = '0px'
   windowMove.style.left = '0px'
   windowMove.style.width = width*0.95 + 'px'
-  windowMove.style.height = '90px'
-  windowMove.style.backgroundColor = '#B0A3FF'
+  windowMove.style.height = '100px'
+  windowMove.style.backgroundColor = 'transparent' //#B0A3FF80
   windowMove.style.cursor = 'default'
   windowMove.style.boxSizing = 'border-box'
 
@@ -65,31 +62,44 @@ export function createPinWindowDiv() {
 
   windowMove.addEventListener('mousedown', function(){
     moveClick = true
-    //console.log(moveClick)
   })
 
   windowMove.addEventListener('mouseup', function(){
     moveClick = false
-    //console.log(moveClick)
   })
 
   const windowDel = document.createElement('button')
   windowDel.id = 'windowDelete'
   windowDel.style.position = 'absolute'
-  windowDel.style.top = '0px'
-  windowDel.style.right = '0px'
-  windowDel.style.width = width*0.05 + 'px'
-  windowDel.style.height = '90px'
-  windowDel.style.backgroundColor = 'red'
+  windowDel.style.top = '30px'
+  windowDel.style.right = '17px'
+  windowDel.style.width = '20px'
+  windowDel.style.height = '20px'
+  windowDel.style.backgroundColor = 'transparent'
   windowDel.style.cursor = 'pointer'
   windowDel.style.boxSizing = 'border-box'
+  windowDel.style.borderRadius = '10px'
+  // windowDel.style.display = 'flex'
+  // windowDel.style.justifyContent = 'center'
+  // windowDel.style.alignItems = 'center'
 
+  const addImage = document.createElement('img')
+  addImage.src = './image/plusIcon.png'
+  addImage.style.width = '100%'
+  addImage.style.height = '100%'
+  addImage.style.opacity = '0.9'
+  addImage.style.transform = 'rotate(45deg)'
+  addImage.alt = 'save'
+
+  windowDel.appendChild(addImage)
   pinWindowDiv.appendChild(windowDel)
 
-  windowDel.addEventListener('click', function(){
+  function deleteWindow() {
+    deletePin()
     pinWindowDiv.remove()
-    deletePinWindowDiv()
-  })
+  }
+
+  windowDel.addEventListener('click', deleteWindow)
 
   const eventInput = document.createElement('input')
   eventInput.type = 'text'
@@ -97,13 +107,15 @@ export function createPinWindowDiv() {
   eventInput.placeholder = 'Event Title'
   eventInput.style.position = 'absolute'
   eventInput.style.left = textPadding
-  eventInput.style.top = '22px'
+  eventInput.style.top = '30px'
   eventInput.style.fontSize = '24px'
   eventInput.style.maxHeight = '20px'
   eventInput.style.letterSpacing = '0px'
   eventInput.style.fontWeight = 'bold'
   eventInput.style.fontFamily = 'Arial'
-  eventInput.style.width = '270px'
+  eventInput.style.color = 'white'
+  eventInput.style.width = '200px'
+  eventInput.style.backgroundColor = 'transparent'
   eventInput.style.outline = 'none'
 
   pinWindowDiv.appendChild(eventInput)
@@ -113,33 +125,35 @@ export function createPinWindowDiv() {
   headerInput.id = 'headerInput'
   headerInput.placeholder = 'Enter Header'
   headerInput.style.position = 'absolute'
-  headerInput.style.top = '100px'
+  headerInput.style.top = '110px'
   headerInput.style.fontSize = '18px'
   headerInput.style.left = textPadding
   headerInput.style.width = '350px'
   headerInput.style.height = '25px'
   headerInput.style.fontFamily = 'Arial'
   headerInput.style.letterSpacing = '0px'
+  headerInput.style.color = 'white'
   headerInput.style.fontWeight = 'bold'
   headerInput.style.backgroundColor = 'transparent'
   headerInput.style.outline = 'none'
 
   pinWindowDiv.appendChild(headerInput)
 
-  const descriptionInput = document.createElement('input')
-  descriptionInput.type = 'text'
+  const descriptionInput = document.createElement('textarea')
   descriptionInput.id = 'descriptionInput'
   descriptionInput.placeholder = 'Enter Description'
   descriptionInput.style.position = 'absolute'
-  descriptionInput.style.top = '120px'
+  descriptionInput.style.top = '150px'
   descriptionInput.style.left = textPadding
   descriptionInput.style.fontSize = '12px'
   descriptionInput.style.width = '350px'
-  descriptionInput.style.height = '50px'
+  descriptionInput.style.height = windowHeight/3 + 'px'
   descriptionInput.style.outline = 'none'
   descriptionInput.style.fontFamily = 'Arial'
   descriptionInput.style.letterSpacing = '1px'
+  descriptionInput.style.color = 'white'
   descriptionInput.style.backgroundColor = 'transparent'
+  descriptionInput.style.resize = 'none'; // Optional, to prevent resizing
 
   pinWindowDiv.appendChild(descriptionInput)
 
@@ -148,24 +162,27 @@ export function createPinWindowDiv() {
   inputYear.textContent = `${globalThis.targetYear} ${globalThis.targetBCE}`
   inputYear.style.position = 'absolute'
   inputYear.style.fontSize = '18px'
-  inputYear.style.top = '20px'
-  inputYear.style.right = '15px'
+  inputYear.style.top = '25px'
+  inputYear.style.right = '50px'
   inputYear.style.width = '110px'
+  inputYear.style.height = '30px'
   inputYear.style.fontWeight = 'bold'
-  inputYear.style.paddingTop = '.5px'
+  inputYear.style.paddingTop = '2px'
   inputYear.style.textAlign = 'center'
-  inputYear.style.color = 'rgb(90,90,90)'
+  inputYear.style.color = 'white'
+  inputYear.style.backgroundColor
   inputYear.style.borderRadius = '20px'
-  //inputYear.style.border = '1.5px solid darkgray'
-  inputYear.style.boxShadow = '0 0 7px 1px rgba(0,0,0,0.2)'
+  inputYear.style.border = '1.2px solid white'
+  //inputYear.style.boxShadow = '0 0 7px 1px white'
 
   pinWindowDiv.appendChild(inputYear)
 
   const locationLat = document.createElement('text')
   locationLat.id = 'locationLat'
   locationLat.textContent = `LAT: ${globalThis.pinLatitude}`
+  locationLat.style.color = 'transparent'
   locationLat.style.position = 'absolute'
-  locationLat.style.top = '55px'
+  locationLat.style.top = '65px'
   locationLat.style.fontSize = '9px'
   locationLat.style.right = '15px'
   //locationLat.style.fontWeight = 'bold'
@@ -176,14 +193,39 @@ export function createPinWindowDiv() {
   const locationLng = document.createElement('text')
   locationLng.id = 'locationLng'
   locationLng.textContent = `LNG: ${globalThis.pinLongitude}`
+  locationLng.style.color = 'transparent'
   locationLng.style.position = 'absolute'
-  locationLng.style.top = '68px'
+  locationLng.style.top = '78px'
   locationLng.style.fontSize = '9px'
   locationLng.style.right = '15px'
   //locationLng.style.fontWeight = 'bold'
   locationLng.style.textAlign = 'right'
   //locationLng.style.fontFamily = "Spline Sans Mono,sans-serif"
   pinWindowDiv.appendChild(locationLng)
+
+  const heightResize = document.createElement('button')
+  heightResize.id = 'heightResize'
+  heightResize.textContent = ''
+  heightResize.style.position = 'absolute'
+  heightResize.style.bottom = '0px'
+  heightResize.style.left = '0px'
+  heightResize.style.width = width + 'px'
+  heightResize.style.height = '2px'
+  heightResize.style.cursor = 'n-resize'
+  heightResize.style.boxSizing = 'border-box'
+  heightResize.style.backgroundColor = 'transparent'
+
+  pinWindowDiv.appendChild(heightResize)
+
+  heightResize.addEventListener('mousedown', function(){
+    heightClick = true
+    height += 100
+  })
+
+  heightResize.addEventListener('mouseup', function(){
+    heightClick = false
+  })
+  
 
   const publishButton = document.createElement('button')
   publishButton.id = 'publishButton'
@@ -196,12 +238,17 @@ export function createPinWindowDiv() {
   publishButton.style.fontSize = '16px'
   publishButton.style.fontWeight = 'bold'
   publishButton.style.color = 'white'
-  publishButton.style.backgroundColor = '#7ED4E7'
+  publishButton.style.backgroundColor = '#1bbfb4'
   publishButton.style.borderRadius = '12px'
   publishButton.style.cursor = 'pointer'
   publishButton.style.boxSizing = 'border-box'
 
   pinWindowDiv.appendChild(publishButton)
+
+  let square = two.makeRectangle(30,40,12,12)
+  square.fill = '#B0A3FF'
+  square.stroke = 'none'
+  square.rotation = Math.PI/4
 
   publishButton.addEventListener('click', function(){
     const eventData = document.getElementById('eventInput').value;
@@ -237,6 +284,8 @@ export function createPinWindowDiv() {
     };
 
     xhr.send(JSON.stringify(data));
+
+    deleteWindow()
   });
 
   // const saveButton = document.createElement('button')
@@ -261,35 +310,25 @@ export function createPinWindowDiv() {
   const addButton = document.createElement('button')
   addButton.id = 'addButton'
   addButton.style.position = 'absolute'
-  addButton.style.bottom = '100px'
+  addButton.style.bottom = bottomPadding
   addButton.style.left = textPadding
   addButton.style.width = '30px'
   addButton.style.height = '30px'
   addButton.style.cursor = 'pointer'
   addButton.style.boxSizing = 'border-box'
 
-  const addImage = document.createElement('img')
-  addImage.src = './image/plusIcon.png'
-  addImage.style.width = '100%'
-  addImage.style.height = '100%'
-  addImage.style.opacity = '0.5'
-  addImage.alt = 'save'
-
-  addButton.appendChild(addImage)
+  //addButton.appendChild(addImage)
   pinWindowDiv.appendChild(addButton)
 
-  // saveButton.addEventListener('click', function(){
-  //   console.log('save was clicked')
-  // })
-  
   addButton.addEventListener('click', function(){
     console.log('yay!')
   })
 
-  // let square = two.makeRectangle(30,32,12,12)
-  // square.fill = 'white'
-  // square.stroke = 'none'
-  // square.rotation = Math.PI/4
+
+  // saveButton.addEventListener('click', function(){
+  //   console.log('save was clicked')
+  // })
+
 
   // let line = two.makeLine(50,90,width-15,90)
   // line.width = 0.3
@@ -303,10 +342,8 @@ export function createPinWindowDiv() {
   return newId++
 }
 
-
 export function deletePinWindowDiv(id) {
-  const element = document.getElementById('pinDiv' + id)
-  element.remove()
+  document.getElementById('pinDiv' + id)
   pinWindowDivs.delete(id)
 }
 
@@ -395,4 +432,4 @@ function pinWindowMM(event) {
   }
 }
 
-export { withinPinWindowBounds, resizePinWindow, pinWindowMD, pinWindowMU, pinWindowMM }
+export { withinPinWindowBounds, resizePinWindow, pinWindowMD, pinWindowMU, pinWindowMM}

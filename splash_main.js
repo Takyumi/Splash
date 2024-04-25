@@ -3,6 +3,7 @@ import { withinTimelineBounds, timelineMD, timelineMU, timelineMM } from "./time
 import { withinTargetYearBounds, resizeTargetYear, targetYearMD, targetYearMU, targetYearMM } from "./targetYear.js"
 import { withinLocationPinBounds, resizeLocationPin, locationToggleMD, locationToggleMU, locationToggleMM } from "./locationToggle.js"
 import { withinPinWindowBounds, resizePinWindow, pinWindowMD, pinWindowMU, pinWindowMM } from "./pinWindow.js"
+//import { withinSearchWindowBounds, searchWindowMD} from "./searchUI.js"
 
 document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('mousedown', mouseDown)
@@ -20,6 +21,7 @@ function mouseDown(event) {
   else if (withinPinWindowBounds(mouseX, mouseY)) pinWindowMD(event)
   else if (withinLocationPinBounds(mouseX, mouseY)) locationToggleMD(event)
   else if (withinTimelineBounds(mouseY)) timelineMD(event)
+  //else if (withinSearchWindowBounds(mouseX,mouseY)) searchWindowMD(event)
 }
 
 function mouseUp(event) {
@@ -27,6 +29,7 @@ function mouseUp(event) {
   pinWindowMU(event)
   locationToggleMU(event)
   timelineMU(event)
+  //searchWindowMU(event)
 }
 
 function mouseMove(event) {
@@ -34,6 +37,7 @@ function mouseMove(event) {
   targetYearMM(event)
   locationToggleMM(event)
   timelineMM(event)
+  //searchWindowMM(event)
 }
 
 function resize(_) {
@@ -41,4 +45,5 @@ function resize(_) {
   resizeTargetYear()
   resizeLocationPin()
   resizePinWindow()
+  
 }

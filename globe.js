@@ -166,6 +166,9 @@ let scaleVector = new THREE.Vector3()
 
 function animate() {
   requestAnimationFrame(animate)
+
+  //group.rotation.y += 0.005
+
   renderer.render(scene, camera)
 
   //update the picking ray with the camera and mouse position
@@ -288,14 +291,16 @@ addEventListener('mouseup', (event) => {
   if (globalThis.addPin) {
     createPin(event)
     pinWindowId = createPinWindowDiv()
-  } else if (inPin()) {
-    group.remove(pin)
-    pin = undefined
-    resetLocationPin()
-    deletePinWindowDiv(pinWindowId)
-    pinWindowId = undefined
   }
 })
+
+export function deletePin() {
+  group.remove(pin)
+  pin = undefined
+  resetLocationPin()
+  deletePinWindowDiv(pinWindowId)
+  pinWindowId = undefined
+}
 
 function createPin(event) {
   const offset = globeContainer.getBoundingClientRect().top
@@ -319,6 +324,36 @@ function createPin(event) {
     globalThis.addPin = false
   }
 }
+
+function createPinFromCoords(lat, lng) {
+  pin = new THREE.Mesh(
+    new THREE.ConeGeometry(0.2, 0.5, 6, 1, false, 0.5), 
+    new THREE.ShaderMaterial({
+      vertexShader: coneVertexShader,
+      fragmentShader: coneFragmentShader
+    })
+  )
+
+  const radius = 5.25
+
+  const latitude = lat * Math.PI / 180
+  const longitude = lng * Math.PI / 180 + Math.PI / 2
+
+  const x = radius * Math.cos(latitude) * Math.sin(longitude)
+  const y = radius * Math.sin(latitude)
+  const z = radius * Math.cos(latitude) * Math.cos(longitude)
+
+  const pos = new THREE.Vector3(x, y, z)
+
+  pin.position.copy(pos)
+
+  pin.geometry.rotateX( Math.PI / 2 )
+  pin.lookAt(centerPoint.position)
+  group.add(pin)
+  globalThis.addPin = false
+}
+
+export {createPinFromCoords}
 
 function resizeGlobe(_) {
   renderer.setSize(globeContainer.offsetWidth, globeContainer.offsetHeight)
